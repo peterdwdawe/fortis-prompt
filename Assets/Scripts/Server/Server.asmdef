@@ -1,0 +1,25 @@
+{
+    "name": "Server",
+    "rootNamespace": "",
+    "references": [
+        "GUID:f85e4fd8f46474b15ace7d824c89b3d8"
+    ],
+    "includePlatforms": [
+        "EmbeddedLinux",
+        "LinuxStandalone64",
+        "CloudRendering",
+        "macOSStandalone",
+        "WindowsStandalone32",
+        "WindowsStandalone64"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "UNITY_SERVER"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
