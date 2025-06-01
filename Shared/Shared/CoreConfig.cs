@@ -10,6 +10,9 @@ public static class NetworkConfig
     }
 
     public static readonly float TickInterval;
+    public static int TickIntervalMS => (int)(TickInterval * 1000);
+    public static readonly int Port = 5000;
+    public static readonly byte MaxConnectionCount = 16;
 }
 
 public static class NetworkState
