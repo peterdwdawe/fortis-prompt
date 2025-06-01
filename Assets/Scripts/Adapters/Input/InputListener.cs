@@ -8,7 +8,7 @@ namespace Adapters.Input
     {
         public event Action OnShoot;
 
-        public Vector2 Movement { get; private set; }
+        public System.Numerics.Vector2 Movement { get; private set; }
 
         private void Update ()
         {
@@ -17,7 +17,7 @@ namespace Adapters.Input
                 OnShoot?.Invoke();
             }
 
-            Movement = new Vector2(UnityEngine.Input.GetAxis("Horizontal"), UnityEngine.Input.GetAxis("Vertical"));
+            Movement = new System.Numerics.Vector2(UnityEngine.Input.GetAxis("Horizontal"), UnityEngine.Input.GetAxis("Vertical"));
         }
     }
 }

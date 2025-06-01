@@ -15,8 +15,8 @@ namespace Adapters.Character
 
         private void Update()
         {
-            transform.position = Vector3.Lerp(transform.position, _player.Position, 0.8f);
-            transform.rotation = Quaternion.Slerp(transform.rotation, _player.Rotation, 0.8f);
+            transform.position = Vector3.Lerp(transform.position, _player.Position.ToUnityVector(), 0.8f);
+            transform.rotation = Quaternion.Slerp(transform.rotation, _player.Rotation.ToUnityQuaternion(), 0.8f);
         }
     }
 }

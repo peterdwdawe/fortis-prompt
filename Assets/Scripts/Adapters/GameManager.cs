@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Adapters.Character;
 using Adapters.Input;
@@ -25,7 +26,7 @@ namespace Adapters
             _players.Add(_player);
         }
 
-        private void HandleShoot(Vector3 position, Vector3 direction)
+        private void HandleShoot(System.Numerics.Vector3 position, System.Numerics.Vector3 direction)
         {
             Projectile projectile = new Projectile(position, direction);
             ProjectileView projectileView = Instantiate(Resources.Load<ProjectileView>("Projectile"));

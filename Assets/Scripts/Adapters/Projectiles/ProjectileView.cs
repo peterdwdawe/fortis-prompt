@@ -16,7 +16,7 @@ namespace Adapters.Projectiles
 
         private void Update()
         {
-            transform.position = Vector3.Lerp(transform.position, _projectile.Position, 0.8f);
+            transform.position = Vector3.Lerp(transform.position, _projectile.Position.ToUnityVector(), 0.8f);
         }
     }
 }
