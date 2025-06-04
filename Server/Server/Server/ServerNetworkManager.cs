@@ -12,7 +12,7 @@ namespace Server
         public ServerNetworkManager(int port, float tickInterval) : base(port, tickInterval) { }
 
 
-        protected override bool StartInternal()
+        protected override bool StartInternal(string address)
         {
 
             if (!_netManager.Start(_port))
@@ -70,7 +70,7 @@ namespace Server
         {
             if (!IsConnected())
             {
-                Log($"{message.GetType()} SendToAll failed: not connected!");
+                //Log($"{message.GetType()} SendToAll failed: not connected!");
                 return;
             }
 
@@ -83,7 +83,7 @@ namespace Server
         {
             if (!IsConnected())
             {
-                Log($"{message.GetType()} SendToAllExecpt {playerID} failed: not connected!");
+                //Log($"{message.GetType()} SendToAllExecpt {playerID} failed: not connected!");
                 return;
             }
 
@@ -103,7 +103,7 @@ namespace Server
         {
             if (!IsConnected())
             {
-                Log($"{message.GetType()} SendTo {playerID} failed: not connected!");
+                //Log($"{message.GetType()} SendTo {playerID} failed: not connected!");
                 return;
             }
 
@@ -121,7 +121,7 @@ namespace Server
         {
             if (!IsConnected())
             {
-                Log($"{message.GetType()} SendTo {peer.Id} failed: not connected!");
+                //Log($"{message.GetType()} SendTo {peer.Id} failed: not connected!");
                 return;
             }
 

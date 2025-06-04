@@ -9,15 +9,15 @@ namespace Adapters.Networking
     {
         public ClientNetworkManager(int port, float tickInterval) : base(port, tickInterval) { }
 
-        protected override bool StartInternal()
+        protected override bool StartInternal(string address)
         {
             _netManager.UnconnectedMessagesEnabled = true;
 
             if (!_netManager.Start())
                 return false;
 
-            Log($"Attempting connection to {NetworkingUtils.testNetworkAddress} (Port {_port})");
-            _netManager.Connect(NetworkingUtils.testNetworkAddress, _port, NetworkingUtils.testNetworkKey);
+            Log($"Attempting connection to {address} (Port {_port})");
+            _netManager.Connect(address, _port, NetworkingUtils.testNetworkKey);
             return true;
         }
 

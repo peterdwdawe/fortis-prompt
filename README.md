@@ -30,7 +30,7 @@
 ### Nice To Have:
 - [X] Bandwidth Usage Reporting
 - [ ] Unit Tests
-- [ ] Start Screen
+- [X] Start Screen
 - [ ] Collision
 - [ ] Bots
   - [ ] Chase player

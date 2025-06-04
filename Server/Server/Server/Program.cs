@@ -14,7 +14,7 @@ internal class Program
         //server = new ServerNetworkManager(NetworkConfig.Port, NetworkConfig.TickInterval);
         NetDebug.Logger = server;
 
-        if (!server.StartNetworking())
+        if (!server.StartNetworking(string.Empty))  //address not needed for server
         {
             Console.WriteLine($"\nServer failed to start on port {NetworkConfig.Port}. Press any key to exit...");
             Console.ReadKey(true);

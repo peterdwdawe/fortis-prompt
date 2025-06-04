@@ -67,7 +67,10 @@ namespace Shared.Networking
                 );
         }
 
-        public bool Start(IMessageHandler messageHandler)
+        public int GetPeerCount()
+            => _netManager != null ? _netManager.ConnectedPeersCount : 0;
+
+        public bool Start(string address, IMessageHandler messageHandler)
         {
             if (started)
                 return false;
@@ -87,7 +90,7 @@ namespace Shared.Networking
                 _messageHandler.OnNetworkStart();
             }
 
-            if (!StartInternal())
+            if (!StartInternal(address))
             {
                 if (_messageHandler != null)
                 {
@@ -105,7 +108,7 @@ namespace Shared.Networking
             return true;
         }
 
-        protected abstract bool StartInternal();
+        protected abstract bool StartInternal(string address);
 
         public void Stop()
         {

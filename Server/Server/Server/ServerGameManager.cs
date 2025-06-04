@@ -213,5 +213,14 @@ namespace Server
             base.ApplyNetworkedMovement(playerID, input, position, rotation);
             networkManager.SendToAllExcept(playerID, new PlayerUpdateMessage(playerID, input, position, rotation));
         }
+
+        public void OnPeerDisconnected()
+        {
+            if(networkManager.GetPeerCount() < 1)
+            {
+                Log("All clients disconnected. Cleaning up game data.");
+                Cleanup();
+            }
+        }
     }
 }

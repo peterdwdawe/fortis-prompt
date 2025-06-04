@@ -91,5 +91,10 @@ namespace Adapters
         {
             return new Projectile(ID, ownerID, position, direction);
         }
+
+        public override void OnServerDisconnected() { 
+            Log("Lost connection to server.");
+            StopNetworking();
+        }
     }
 }

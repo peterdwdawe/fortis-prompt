@@ -80,7 +80,7 @@ namespace Adapters.Networking
 
         public override void OnPeerDisconnected(NetPeer peer)
         {
-            gameManager.Cleanup();
+            gameManager.OnServerDisconnected();
         }
 
     }

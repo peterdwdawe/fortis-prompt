@@ -20,6 +20,12 @@ namespace Adapters
             _manager.StateChanged += _manager_StateChanged;
             _manager.MessageLogged += _manager_MessageLogged;
         }
+
+        private void Start()
+        {
+            StateChanged?.Invoke(NetworkManager.ConnectionState.Uninitialized);
+        }
+
         public event Action<string> MessageLogged;
 
         private void _manager_MessageLogged(string obj)
@@ -39,9 +45,9 @@ namespace Adapters
             _manager.Tick();
         }
 
-        public void StartClient()
+        public void StartClient(string address)
         {
-            _manager.StartNetworking();
+            _manager.StartNetworking(address);
         }
 
         public void StopClient()

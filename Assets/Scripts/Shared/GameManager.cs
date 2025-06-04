@@ -57,19 +57,19 @@ namespace Shared
         public NetworkManager.NetworkStatistics GetNetworkStatistics()
             => networkManager != null ? networkManager.GetStatistics() : NetworkManager.NetworkStatistics.Empty;
 
-        public bool StartNetworking()
+        public bool StartNetworking(string address)
         {
             StopNetworking();
 
             networkManager = GenerateNetworkManager();
             var messageHandler = GenerateMessageHandler();
-            if (!networkManager.Start(messageHandler))
+            if (!networkManager.Start(address, messageHandler))
             {
                 Log("Failed to start networking!");
                 networkManager = null;
                 return false;
             }
-            Log("Started networking!");
+            //Log("Started networking!");
             return true;
         }
 
@@ -83,7 +83,7 @@ namespace Shared
             networkManager.Stop();
             networkManager = null;
             StateChanged?.Invoke(NetworkManager.ConnectionState.Uninitialized);
-            Log("Stopped networking!");
+            //Log("Stopped networking!");
         }
 
         public event Action<NetworkManager.ConnectionState> StateChanged;
@@ -99,6 +99,9 @@ namespace Shared
             NetworkState.Tick();
 
             networkManager.PollEvents();
+
+            if (networkManager == null) //PollEvents can make us close connection - we need to check here again to make sure we're still in-game.
+                return;
 
             var networkState = networkManager.CheckConnectionState(out bool stateChanged);
             if (stateChanged)
@@ -225,7 +228,7 @@ namespace Shared
             {
                 //player.OnShootNetworked += HandleShoot;
                 player.OnShootRequested -= RequestShoot;
-                Log($"Destroy Player {ID}!");
+                Log($"Player {ID} Removed");
                 player.Destroy();
             }
             else
@@ -249,7 +252,7 @@ namespace Shared
         {
             if (TryGetPlayer(ID, out var player))
             {
-                Log($"Kill player {ID}!");
+                //Log($"Kill player {ID}!");
                 player.Kill();
             }
             else
@@ -279,7 +282,7 @@ namespace Shared
 
             projectileLookup[ID] = projectile;
 
-            Log($"Projectile {ID} Created");
+            //Log($"Projectile {ID} Created");
             ProjectileInstantiated?.Invoke(projectile);
         }
 
@@ -322,5 +325,8 @@ namespace Shared
                 DestroyPlayer(player.ID);
             }
         }
+
+
+        public virtual void OnServerDisconnected() { }
     }
 }

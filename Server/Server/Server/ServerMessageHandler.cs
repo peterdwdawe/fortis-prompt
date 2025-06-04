@@ -85,6 +85,7 @@ namespace Server
         public override void OnPeerDisconnected(NetPeer peer)
         {
             gameManager.DestroyPlayer(peer.Id);
+            gameManager.OnPeerDisconnected();
             //TODO(); //Destroy Player
             //    TODO(); //send message to all remaining peers
         }

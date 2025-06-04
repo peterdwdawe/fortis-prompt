@@ -45,6 +45,7 @@ namespace Shared.Player
             _inputListener.OnTransformUpdated += UpdateTransform;
             HP = PlayerConfig.MaxHP;
             LocalPlayer = localPlayer;
+            _lastMovementDirection = Vector3.UnitZ;
         }
 
         private void UpdateTransform(Vector3 position, Quaternion rotation)
