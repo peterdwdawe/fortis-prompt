@@ -54,6 +54,9 @@ namespace Shared
         public event Action<Player.Player> PlayerInstantiated;
         public event OnRequestShootHandler ShootRequested;
 
+        public NetworkManager.NetworkStatistics GetNetworkStatistics()
+            => networkManager != null ? networkManager.GetStatistics() : NetworkManager.NetworkStatistics.Empty;
+
         public bool StartNetworking()
         {
             StopNetworking();

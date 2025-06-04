@@ -39,10 +39,33 @@ namespace Shared.Networking
 
         IMessageHandler _messageHandler = null;
 
-        public long BytesSent => _netManager != null ? _netManager.Statistics.BytesSent : 0;
-        public long BytesReceived => _netManager != null ? _netManager.Statistics.BytesReceived : 0;
-        public float AvgBandwidthUp => BytesSent / MathF.Max(NetworkState.CurrentTime, 1f);
-        public float AvgBandwidthDown => BytesReceived / MathF.Max(NetworkState.CurrentTime, 1f);
+        public readonly struct NetworkStatistics
+        {
+            public static readonly NetworkStatistics Empty = new NetworkStatistics(0,0,1f);
+
+            public readonly long BytesSent;
+            public readonly long BytesReceived;
+            public readonly float TimeElapsed;
+
+            public NetworkStatistics(long bytesSent, long bytesReceived, float timeElapsed)
+            {
+                BytesSent = bytesSent;
+                BytesReceived = bytesReceived;
+                TimeElapsed = MathF.Max(timeElapsed, NetworkConfig.TickInterval);
+            }
+
+            public float AvgBandwidthUp => BytesSent / TimeElapsed;
+            public float AvgBandwidthDown => BytesReceived / TimeElapsed;
+        }
+
+        public NetworkStatistics GetStatistics()
+        {
+            return new NetworkStatistics(
+                _netManager != null ? _netManager.Statistics.BytesSent : 0,
+                _netManager != null ? _netManager.Statistics.BytesReceived : 0,
+                NetworkState.CurrentTime
+                );
+        }
 
         public bool Start(IMessageHandler messageHandler)
         {

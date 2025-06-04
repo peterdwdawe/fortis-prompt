@@ -11,6 +11,9 @@ namespace Adapters
 
         ClientGameManager _manager;
 
+        public NetworkManager.NetworkStatistics GetNetworkStatistics()
+            => _manager.GetNetworkStatistics();
+
         private void Awake()
         {
             _manager = new ClientGameManager(_localInputListener);

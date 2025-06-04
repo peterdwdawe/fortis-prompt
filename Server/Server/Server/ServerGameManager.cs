@@ -161,7 +161,7 @@ namespace Server
 
             foreach (var player in AllPlayers)
             {
-                if (player.ID == projectile.ownerID) 
+                if (player.ID == projectile.ownerID || !player.Alive) 
                 {
                     continue;
                 }

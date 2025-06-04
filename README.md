@@ -28,7 +28,7 @@
 - [X] Character Spawn/Despawn Logic
 
 ### Nice To Have:
-- [ ] Bandwidth Usage Reporting
+- [X] Bandwidth Usage Reporting
 - [ ] Unit Tests
 - [ ] Start Screen
 - [ ] Collision
