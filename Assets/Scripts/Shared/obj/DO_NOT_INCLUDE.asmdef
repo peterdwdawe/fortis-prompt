@@ -1,0 +1,16 @@
+{
+    "name": "Shared_Generated",
+    "rootNamespace": "",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "DO_NOT_INCLUDE"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": true
+}

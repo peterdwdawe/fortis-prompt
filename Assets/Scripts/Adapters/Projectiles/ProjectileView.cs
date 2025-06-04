@@ -1,4 +1,4 @@
-using Core.Projectiles;
+using Shared.Projectiles;
 using UnityEngine;
 
 namespace Adapters.Projectiles
@@ -10,7 +10,7 @@ namespace Adapters.Projectiles
         public void Setup(IProjectile player)
         {
             _projectile = player;
-            _projectile.OnExpire += () => Destroy(gameObject);
+            _projectile.Destroyed += (_) => Destroy(gameObject);
             enabled = true;
         }
 

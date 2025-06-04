@@ -1,0 +1,41 @@
+﻿using LiteNetLib;
+using LiteNetLib.Utils;
+
+namespace Shared.Networking.Messages
+{
+    public struct PlayerDeathMessage : INetworkMessage<PlayerDeathMessage>
+    {
+        public MessageType MsgType => MessageType.PlayerDeath;
+
+        public int playerID;
+
+        public PlayerDeathMessage(NetDataReader reader) : this()
+        {
+            Deserialize(reader);
+        }
+
+        public PlayerDeathMessage(int playerID)
+        {
+            this.playerID = playerID;
+        }
+
+        public void Deserialize(NetDataReader reader)
+        {
+            reader.SkipBytes(1);    // skip msgID byte
+            playerID = reader.GetInt();
+        }
+
+        public void Serialize(NetDataWriter writer)
+        {
+            writer.Put((byte)MsgType);
+            writer.Put(playerID);
+        }
+
+        public void Receive(NetPeer peer)
+        {
+            Received?.Invoke(peer, this);
+        }
+
+        internal static event System.Action<NetPeer, PlayerDeathMessage> Received;
+    }
+}

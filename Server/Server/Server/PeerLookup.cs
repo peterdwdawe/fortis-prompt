@@ -26,7 +26,7 @@ namespace Server
 
             peers[ID] = peer;
 
-            TODO();//notify registration
+            //TODO();//notify registration
         }
         internal static void OnPeerDisconnected(NetPeer peer)
         {
@@ -39,7 +39,7 @@ namespace Server
 
             peers.Remove(ID);
 
-            TODO();//notify deregistration
+            //TODO();//notify deregistration
         }
     }
 }

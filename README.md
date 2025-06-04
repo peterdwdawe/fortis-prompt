@@ -4,27 +4,28 @@
 ### Required:
 
 **Server:**
-- [ ] Spawn/Despawn Players on Connect/Disconnect
+- [X] Spawn/Despawn Players on Connect/Disconnect
 - [ ] Projectiles
   - [ ] Instantiation & registration via rpc
-  - [ ] Hit detection: health reduction and notification
-- [ ] Update and forward character controls and transform data when received
-- [ ] Detect character death, despawn
-- [ ] Respawn characters after death
+  - [X] Hit detection: health reduction and notification
+- [X] Update and forward character controls and transform data when received
+- [X] Detect character death, despawn
+- [X] Respawn characters after death
+- [X] HP Bars
       
 **Client:**
-- [ ] Spawn/Despawn Local Player on Connect/Disconnect
-- [ ] Spawn/Despawn Networked Players on Request
-- [ ] Send local controls + position/rotation on tick
-- [ ] Update Networked character controls + position/rotation on request
+- [X] Spawn/Despawn Local Player on Connect/Disconnect
+- [X] Spawn/Despawn Networked Players on Request
+- [X] Send local controls + position/rotation on tick
+- [X] Update Networked character controls + position/rotation on request
 - [ ] RPC Projectiles
   - [ ] Send RPC on projectile fire
-  - [ ] Instantiate & Simulate projectiles on request
+  - [X] Instantiate & Simulate projectiles on request
         
 **Shared:**
-- [ ] Movement + Prediction
-- [ ] Projectile Simulation (Not Including Hit detection)
-- [ ] Character Spawn/Despawn Logic
+- [X] Movement + Prediction
+- [X] Projectile Simulation (Not Including Hit detection)
+- [X] Character Spawn/Despawn Logic
 
 ### Nice To Have:
 - [ ] Bandwidth Usage Reporting

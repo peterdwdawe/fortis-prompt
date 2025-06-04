@@ -1,0 +1,32 @@
+using System;
+using System.Numerics;
+
+namespace Shared.Player
+{
+    public interface IPlayer : IDisposable
+    {
+        event OnRequestShootHandler OnShootRequested;
+        event Action<IPlayer> HPSet;
+        event Action<IPlayer> Spawned;
+        event Action<IPlayer> Died;
+        event Action<IPlayer> Destroyed;
+        event Action<IPlayer> RespawnRequested;
+        event Action<IPlayer> OnUpdateRequested;
+
+        Vector3 Position { get; }
+        Quaternion Rotation { get; }
+        int ID { get; }
+        int HP { get;}
+        bool Alive { get; }
+        bool LocalPlayer { get; }
+        Vector2 LastInput { get; }
+
+        void SetHP(int HP);
+
+        void Tick();
+
+        void Spawn(Vector3 position, Quaternion rotation);
+        void Kill();
+        void Destroy();
+    }
+}

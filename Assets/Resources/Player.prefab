@@ -364,3 +364,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ffe233739174eb6b50054e2fad8aa83, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  localPlayerMaterial: {fileID: 2100000, guid: ae064ade4e37b4a5daf789b7f054d80e, type: 2}
+  networkedPlayerMaterial: {fileID: 2100000, guid: bd1084ca1479d6247b32f96c40563128, type: 2}
+  root: {fileID: 2114913537564437966}
+  mainCapsule: {fileID: 637364439354300426}

@@ -1,5 +1,4 @@
-﻿using Core.Server;
-using LiteNetLib;
+﻿using LiteNetLib;
 using Server;
 using Shared.Networking;
 using Shared.Networking.Messages;
@@ -8,57 +7,49 @@ using System.Threading;
 
 internal class Program
 {
-    static GameServer server;
-
     private static void Main(string[] args)
     {
         Console.WriteLine("Starting game server...");
-        server = new GameServer(NetworkConfig.Port, NetworkConfig.TickInterval);
-        server.MessageReceived += OnMessageReceived;
-        if (!server.Start())
+        var server = new ServerGameManager();
+        //server = new ServerNetworkManager(NetworkConfig.Port, NetworkConfig.TickInterval);
+        NetDebug.Logger = server;
+
+        if (!server.StartNetworking())
         {
-            Console.WriteLine($"Server failed to start on port {NetworkConfig.Port}. Press any key to exit...");
+            Console.WriteLine($"\nServer failed to start on port {NetworkConfig.Port}. Press any key to exit...");
             Console.ReadKey(true);
             return;
         }
-        Console.WriteLine($"Server started on port {NetworkConfig.Port}. Press any key to stop server.{Environment.NewLine}");
-        while (!Console.KeyAvailable)
+
+        Console.WriteLine($"\nServer started on port {NetworkConfig.Port}. Press any key to stop server.{Environment.NewLine}");
+        try
         {
-            server.PollEvents();
-            Thread.Sleep(NetworkConfig.TickIntervalMS);
+            while (!Console.KeyAvailable)
+            {
+                server.Tick();
+                Thread.Sleep(NetworkConfig.TickIntervalMS);
+            }
         }
-        server.Stop();
-        server.MessageReceived -= OnMessageReceived;
+        catch (System.Exception exception)
+        {
+            Console.WriteLine($"\n\n" +
+                $"-----------------------------------\n" +
+                $"Exception encountered in network loop! {exception.GetType()}: {exception.Message}.\n" +
+                $"Stack Trace:\n" +
+                $"{exception.StackTrace}\n" +
+                $"-----------------------------------\n\n");
+            Thread.Sleep(500);
+        }
+        finally
+        {
+            server.StopNetworking();
+        }
+
         Console.ReadKey(true);
-        Console.WriteLine($"{Environment.NewLine} Server stopped.");
+        Console.WriteLine($"\nServer stopped.");
         Thread.Sleep(500);
+
         Console.WriteLine("Press any key to exit...");
         Console.ReadKey(true);
-    }
-
-
-    private static void OnMessageReceived(NetPeer peer, INetworkMessage message)
-    {
-        switch (message.MsgType)
-        {
-            case MessageType.CustomMessage:
-                CustomMessageTestHandler.OnReceivedCustomMessage((CustomMessage)message, server, peer);
-                break;
-            //case MessageType.PlayerUpdate:
-            //    break;
-            //case MessageType.ProjectileSpawn:
-            //    break;
-            //case MessageType.ProjectileDespawn:
-            //    break;
-            //case MessageType.HealthUpdate:
-            //    break;
-            //case MessageType.Death:
-            //    break;
-            //case MessageType.Respawn:
-            //    break;
-            default:
-                Console.WriteLine($"Unhandled network message type: {message.MsgType}");
-                return;
-        }
     }
 }
