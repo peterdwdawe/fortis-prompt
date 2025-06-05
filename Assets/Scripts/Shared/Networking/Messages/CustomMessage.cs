@@ -36,6 +36,10 @@ namespace Shared.Networking.Messages
             Received?.Invoke(peer, this);
         }
 
+        public bool Equals(CustomMessage other)
+            => MsgType == other.MsgType
+            && msg == other.msg;
+
         internal static event System.Action<NetPeer, CustomMessage> Received;
     }
 }

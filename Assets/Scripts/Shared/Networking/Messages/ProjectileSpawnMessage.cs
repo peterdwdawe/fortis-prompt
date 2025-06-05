@@ -49,6 +49,13 @@ namespace Shared.Networking.Messages
             Received?.Invoke(peer, this);
         }
 
+        public bool Equals(ProjectileSpawnMessage other)
+            => MsgType == other.MsgType
+            && projectileID == other.projectileID
+            && ownerID == other.ownerID
+            && position == other.position
+            && direction == other.direction;
+
         internal static event System.Action<NetPeer, ProjectileSpawnMessage> Received;
     }
 }

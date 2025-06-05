@@ -24,6 +24,6 @@ namespace Shared.Networking
         void Receive(NetPeer peer);
     }
 
-    public interface INetworkMessage<TMessage> : INetworkMessage
+    public interface INetworkMessage<TMessage> : INetworkMessage, System.IEquatable<TMessage>
         where TMessage : struct, INetworkMessage<TMessage> { }
 }

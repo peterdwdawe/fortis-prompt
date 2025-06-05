@@ -36,6 +36,10 @@ namespace Shared.Networking.Messages
             Received?.Invoke(peer, this);
         }
 
+        public bool Equals(PlayerDeathMessage other)
+            => MsgType == other.MsgType
+            && playerID == other.playerID;
+
         internal static event System.Action<NetPeer, PlayerDeathMessage> Received;
     }
 }

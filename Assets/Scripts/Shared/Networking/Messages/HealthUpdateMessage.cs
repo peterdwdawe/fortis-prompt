@@ -40,6 +40,11 @@ namespace Shared.Networking.Messages
             Received?.Invoke(peer, this);
         }
 
+        public bool Equals(HealthUpdateMessage other)
+            => MsgType == other.MsgType
+            && playerID == other.playerID
+            && hp == other.hp;
+
         internal static event System.Action<NetPeer, HealthUpdateMessage> Received;
     }
 }

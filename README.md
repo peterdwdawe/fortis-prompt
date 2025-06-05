@@ -29,7 +29,8 @@
 
 ### Nice To Have:
 - [X] Bandwidth Usage Reporting
-- [ ] Unit Tests
+- [X] Unit Tests _minimal_
+  - [X] Message Serialization/Deserialization
 - [X] Start Screen
 - [ ] Collision
 - [ ] Bots

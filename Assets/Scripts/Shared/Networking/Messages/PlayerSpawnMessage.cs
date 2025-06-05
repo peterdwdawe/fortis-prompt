@@ -45,6 +45,12 @@ namespace Shared.Networking.Messages
             Received?.Invoke(peer, this);
         }
 
+        public bool Equals(PlayerSpawnMessage other)
+            => MsgType == other.MsgType
+            && playerID == other.playerID
+            && position == other.position
+            && rotation == other.rotation;
+
         internal static event System.Action<NetPeer, PlayerSpawnMessage> Received;
     }
 }

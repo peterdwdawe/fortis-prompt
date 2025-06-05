@@ -43,6 +43,11 @@ namespace Shared.Networking.Messages
             Received?.Invoke(peer, this);
         }
 
+        public bool Equals(PlayerRegistrationMessage other)
+            => MsgType == other.MsgType
+            && playerID == other.playerID
+            && localPlayer == other.localPlayer;
+
         internal static event System.Action<NetPeer, PlayerRegistrationMessage> Received;
     }
 }
