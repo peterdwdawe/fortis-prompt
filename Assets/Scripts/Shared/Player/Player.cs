@@ -1,12 +1,7 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 using Shared.Configuration;
 using Shared.Input;
-using Shared.Player;
 
 namespace Shared.Player
 {
@@ -68,14 +63,6 @@ namespace Shared.Player
         {
             OnShootRequested?.Invoke(ID, Position, _lastMovementDirection);
         }
-
-        //private void HandleShootNetworked(ushort projectileID, Vector3 origin, Vector3 direction)
-        //{
-        //    OnShootNetworked?.Invoke(projectileID, origin, direction);
-        //}
-
-        //private void HandleShoot() => OnShoot?.Invoke(Position, _lastMovementDirection);    
-        //TODO();// lastMovementDirection isnt necessarily right when networked
 
         public void Tick()
         {
@@ -140,7 +127,6 @@ namespace Shared.Player
 
         public void Dispose()
         {
-            //_inputListener.OnShootNetworked -= HandleShootNetworked;
             _inputListener.OnShootLocal -= RequestShootNetworked;
             _inputListener.OnTransformUpdated -= UpdateTransform;
         }

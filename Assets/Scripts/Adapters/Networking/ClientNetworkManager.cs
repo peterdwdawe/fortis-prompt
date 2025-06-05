@@ -1,8 +1,7 @@
-﻿using System.Net;
-using UnityEngine;
-using LiteNetLib;
-using Shared.Networking;
+﻿using LiteNetLib;
 using Shared.Configuration;
+using Shared.Networking;
+using UnityEngine;
 
 namespace Adapters.Networking
 {
@@ -23,24 +22,13 @@ namespace Adapters.Networking
                 return false;
 
             Log($"Attempting connection to {serverAddress} (Port {_port})");
-            _netManager.Connect(serverAddress, _port, NetworkingUtils.testNetworkKey);
+            _netManager.Connect(serverAddress, _port, networkState.config.testNetworkKey);
             return true;
         }
 
         protected override void Log(string str)
         {
             Debug.Log("[CLIENT] " + str);
-        }
-
-        public override void OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader, UnconnectedMessageType messageType)
-        {
-            base.OnNetworkReceiveUnconnected (remoteEndPoint, reader, messageType);
-
-            if (messageType == UnconnectedMessageType.BasicMessage && _netManager.ConnectedPeersCount == 0 && reader.GetInt() == 1)
-            {
-                Log("Received discovery response. Connecting to: " + remoteEndPoint);
-                _netManager.Connect(remoteEndPoint, "sample_app");
-            }
         }
 
         public bool IsConnected(out NetPeer server)

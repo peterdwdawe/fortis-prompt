@@ -1,11 +1,9 @@
 using Adapters.Character;
 using Shared.Player;
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+//TODO: general cleanup
 public class PlayerUIView : MonoBehaviour
 {
     [SerializeField] TMPro.TextMeshProUGUI playerID;

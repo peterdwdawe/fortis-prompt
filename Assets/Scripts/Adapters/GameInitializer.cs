@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Adapters
 {
-    public class ClientGameInitializer : MonoBehaviour
+    public class GameInitializer : MonoBehaviour
     {
         [SerializeField] private LocalInputListener _localInputListener;
 

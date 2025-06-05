@@ -1,22 +1,11 @@
-﻿using LiteNetLib;
-using LiteNetLib.Utils;
+﻿using LiteNetLib.Utils;
 using Shared.Networking.Messages;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Shared.Networking
 {
     public static partial class NetworkingUtils
     {
-        //public static void Send(this NetDataWriter writer, INetworkMessage message)
-        //{
-        //    writer.Put(message);
-        //}
-
         public static bool TryReadNetworkMessage(this NetDataReader reader, out INetworkMessage msg)
         {
             MessageType msgType = (MessageType)reader.PeekByte();
@@ -107,8 +96,5 @@ namespace Shared.Networking
             writer.Put(q.Z);
             writer.Put(q.W);
         }
-
-        public const string testNetworkAddress = "localhost";
-        public const string testNetworkKey = "fortis_connect_test";
     }
 }

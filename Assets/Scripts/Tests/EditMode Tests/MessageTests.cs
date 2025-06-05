@@ -1,12 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
-using NUnit.Framework;
-using UnityEngine;
-using UnityEngine.TestTools;
-using Shared.Networking.Messages;
-using System;
 using LiteNetLib.Utils;
+using NUnit.Framework;
 using Shared.Networking;
+using Shared.Networking.Messages;
+using System.Collections.Generic;
 
 public class MessageTests
 {
@@ -28,7 +24,7 @@ public class MessageTests
             ("testMessage");
 
         var health = new HealthUpdateMessage
-            (1, 
+            (1,
             67);
 
         var death = new PlayerDeathMessage
@@ -38,7 +34,7 @@ public class MessageTests
             (3);
 
         var reg = new PlayerRegistrationMessage
-            (4,false);
+            (4, false);
 
         var spawn = new PlayerSpawnMessage
             (5,
@@ -90,14 +86,14 @@ public class MessageTests
     {
         TestSerialization(
             writer, reader, testObject,
-            
-            (NetDataReader r) => 
-            { 
-                reader.Get<T>(out var o); 
-                return o; 
+
+            (NetDataReader r) =>
+            {
+                reader.Get<T>(out var o);
+                return o;
             },
-            
-            (NetDataWriter w, T o) => 
+
+            (NetDataWriter w, T o) =>
                 w.Put<T>(o));
     }
 

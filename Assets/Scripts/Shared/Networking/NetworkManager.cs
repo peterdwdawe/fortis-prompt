@@ -1,7 +1,6 @@
 ﻿using LiteNetLib;
 using LiteNetLib.Utils;
 using Shared.Configuration;
-using Shared.Networking;
 using System;
 using System.Net;
 using System.Net.Sockets;
@@ -10,15 +9,12 @@ namespace Shared.Networking
 {
     public abstract class NetworkManager : INetEventListener 
     {
-
         protected readonly int _port;
         protected NetDataWriter _dataWriter;
         protected NetManager _netManager;
         protected NetworkState networkState;
 
         public bool started { get; private set; } = false;
-
-        //public event Action<NetPeer, INetworkMessage> MessageReceived;
 
         public NetworkManager(NetworkState networkState, int port)
         {
@@ -210,7 +206,6 @@ namespace Shared.Networking
                 stateChanged = false;
             }
             return newState;
-
         }
 
         ConnectionState GetConnectionState()

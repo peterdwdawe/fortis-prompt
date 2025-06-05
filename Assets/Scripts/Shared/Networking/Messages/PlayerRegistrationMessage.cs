@@ -6,8 +6,6 @@ namespace Shared.Networking.Messages
 {
     public struct PlayerRegistrationMessage : INetworkMessage<PlayerRegistrationMessage>
     {
-        //TODO(); // separate message (or field in this message) for sending to a brand new client
-
         public MessageType MsgType => MessageType.PlayerRegistration;
 
         public int playerID;

@@ -10,35 +10,14 @@ using Shared.Projectiles;
 
 namespace Shared
 {
+    //TODO: try to get rid of all these generic type constraints in favor of interfaces
     public abstract class GameManager<TGameManager,TNetworkManager>
         where TGameManager : GameManager<TGameManager, TNetworkManager>
         where TNetworkManager : NetworkManager
     {
-        protected const string gameConfigPath = "GameConfig.json";
-
         protected const string networkConfigPath = "NetworkConfig.json";
         protected const string playerConfigPath = "PlayerConfig.json";
         protected const string projectileConfigPath = "ProjectileConfig.json";
-        //private Player.Player _player;
-        //private List<Player.Player> _players = new List<Player.Player>();
-        //private List<IProjectile> _projectiles = new List<IProjectile>();
-
-        //public void InstantiatePlayer(int id, Input.IInputListener inputListener)
-        //{
-        //    var player = new Player.Player(id, inputListener);
-        //    player.OnShootNetworked += HandleShoot;
-        //    player.OnShootRequested += RequestShoot;
-        //    //PlayerView view = Instantiate(Resources.Load<GameObject>("Player").GetComponentInChildren<PlayerView>());
-        //    //view.Setup(_player);
-        //    _players.Add(player);
-        //    PlayerInstantiated?.Invoke(player);
-        //}
-
-        //protected abstract NetworkConfig LoadNetworkConfig();
-        //protected abstract PlayerConfig LoadPlayerConfig();
-        //protected abstract ProjectileConfig LoadProjectileConfig();
-        //protected abstract GameConfig LoadGameConfig();
-
 
         protected abstract TNetworkManager GenerateNetworkManager();
         protected abstract MessageHandler<TGameManager, TNetworkManager> GenerateMessageHandler();
@@ -50,15 +29,6 @@ namespace Shared
         {
             ShootRequested?.Invoke(playerID, origin, direction);
         }
-
-        //protected void HandleShoot(ushort projectileID, System.Numerics.Vector3 position, System.Numerics.Vector3 direction)
-        //{
-        //    Projectile projectile = new Projectile(projectileID, position, direction);
-        //    //ProjectileView projectileView = Instantiate(Resources.Load<ProjectileView>("Projectile"));
-        //    //projectileView.Setup(projectile);
-        //    _projectiles.Add(projectile);
-        //    ProjectileInstantiated?.Invoke(projectile);
-        //}
 
         public event Action<Projectile> ProjectileInstantiated;
         public event Action<Player.Player> PlayerInstantiated;
@@ -144,29 +114,21 @@ namespace Shared
         Dictionary<int, NetworkedInputListener> networkedInputListenerLookup;
 
         public readonly NetworkConfig networkConfig;
-        public readonly GameConfig gameConfig;
         public readonly PlayerConfig playerConfig;
         public readonly ProjectileConfig projectileConfig;
         public readonly NetworkState networkState;
 
         public GameManager()
         {
-
-            //networkConfig = LoadNetworkConfig();
-            //gameConfig = LoadGameConfig();
-            //playerConfig = LoadPlayerConfig();
-            //projectileConfig = LoadProjectileConfig();
-
             networkConfig = LoadConfig<NetworkConfig>(networkConfigPath);
-            gameConfig = LoadConfig<GameConfig>(gameConfigPath);
             playerConfig = LoadConfig<PlayerConfig>(playerConfigPath);
             projectileConfig = LoadConfig<ProjectileConfig>(projectileConfigPath);
 
             networkState = new NetworkState(networkConfig);
 
-            playerLookup = new Dictionary<int, IPlayer>(gameConfig.MaxPlayers);
-            projectileLookup = new Dictionary<int, IProjectile>(gameConfig.MaxPlayers * 16);
-            networkedInputListenerLookup = new Dictionary<int, NetworkedInputListener>(gameConfig.MaxPlayers);
+            playerLookup = new Dictionary<int, IPlayer>(networkConfig.MaxPlayers);
+            projectileLookup = new Dictionary<int, IProjectile>(networkConfig.MaxPlayers * 16);
+            networkedInputListenerLookup = new Dictionary<int, NetworkedInputListener>(networkConfig.MaxPlayers);
         }
 
         protected bool TryGetPlayer(int ID, out IPlayer player)
@@ -183,34 +145,6 @@ namespace Shared
 
         protected bool TryGetNetworkedInputListener(int ID, out NetworkedInputListener listener)
              => networkedInputListenerLookup.TryGetValue(ID, out listener) && listener != null;
-
-        //private void OnProjectileInstantiated(IProjectile projectile)
-        //{
-        //    TODO();// Replace with InstantiateProjectile
-
-        //    var ID = projectile.ID;
-        //    if (projectileLookup.ContainsKey(ID))
-        //    {
-        //        Log($"OnProjectileInstantiated Error: projectile ID {ID} already exists! overwriting...");
-        //        //TODO();//cleanup previous? this shouldn't be happening anyway
-        //    }
-
-        //    projectileLookup[ID] = projectile;
-        //}
-        //private void OnProjectileDestroyed(IProjectile projectile)
-        //{
-        //    TODO();// Replace with DestroyProjectile
-
-        //    var ID = projectile.ID;
-        //    if (!projectileLookup.ContainsKey(ID))
-        //    {
-        //        Log($"OnProjectileDestroyed Error: projectile ID {ID} not found in lookup! ignoring...");
-        //        return;
-        //    }
-
-        //    projectileLookup.Remove(ID);
-        //}
-
 
         public void InstantiateNetworkedPlayer(int ID)
         {
@@ -231,11 +165,7 @@ namespace Shared
         protected Player.Player InstantiatePlayerInternal(int ID, IInputListener inputListener, bool local)
         {
             var player = CreateNewPlayer(ID, inputListener, local);
-            //player.OnShootNetworked += HandleShoot;
             player.OnShootRequested += RequestShoot;
-            //PlayerView view = Instantiate(Resources.Load<GameObject>("Player").GetComponentInChildren<PlayerView>());
-            //view.Setup(_player);
-            //_players.Add(player);
 
             if (playerLookup.ContainsKey(ID))
             {
@@ -255,7 +185,6 @@ namespace Shared
 
             if (playerLookup.TryGetValue(ID, out var player))
             {
-                //player.OnShootNetworked += HandleShoot;
                 player.OnShootRequested -= RequestShoot;
                 Log($"Player {ID} Removed");
                 player.Destroy();
@@ -354,7 +283,6 @@ namespace Shared
                 DestroyPlayer(player.ID);
             }
         }
-
 
         public virtual void OnServerDisconnected() { }
 

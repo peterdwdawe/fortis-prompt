@@ -1,11 +1,6 @@
 ﻿using LiteNetLib;
 using Shared.Networking;
 using Shared.Networking.Messages;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Adapters.Networking
@@ -21,7 +16,7 @@ namespace Adapters.Networking
 
         protected override void CustomMessage_Received(NetPeer peer, CustomMessage message)
         {
-            
+            //Debug message, currently unused
         }
 
         protected override void PlayerDeathMessage_Received(NetPeer peer, PlayerDeathMessage message)
@@ -75,7 +70,7 @@ namespace Adapters.Networking
 
         public override void OnPeerConnected(NetPeer peer)
         {
-            //Do Nothing?
+            //Do Nothing
         }
 
         public override void OnPeerDisconnected(NetPeer peer)

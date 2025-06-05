@@ -1,7 +1,5 @@
 ﻿using LiteNetLib;
 using Server;
-using Shared.Networking;
-using Shared.Networking.Messages;
 using System;
 using System.Threading;
 

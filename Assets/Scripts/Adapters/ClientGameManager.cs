@@ -3,13 +3,11 @@ using Adapters.Input;
 using Adapters.Networking;
 using Adapters.Projectiles;
 using Shared;
-using Shared.Configuration;
 using Shared.Input;
 using Shared.Networking;
 using Shared.Networking.Messages;
 using Shared.Player;
 using Shared.Projectiles;
-using System.IO;
 using UnityEngine;
 
 namespace Adapters
@@ -17,7 +15,6 @@ namespace Adapters
     public class ClientGameManager : GameManager<ClientGameManager, ClientNetworkManager>
     {
         private readonly LocalInputListener _localInputListener;
-
 
         protected override ClientNetworkManager GenerateNetworkManager()
         {
@@ -36,7 +33,7 @@ namespace Adapters
 
         public ClientGameManager(LocalInputListener localInputListener) : base()
         {
-            _localInputListener = localInputListener; 
+            _localInputListener = localInputListener;
             PlayerInstantiated += OnPlayerInstantiated;
             ShootRequested += OnShootRequested;
             ProjectileInstantiated += OnProjectileInstantiated;
@@ -99,7 +96,8 @@ namespace Adapters
             return new Projectile(ID, ownerID, position, direction, projectileConfig, networkConfig);
         }
 
-        public override void OnServerDisconnected() { 
+        public override void OnServerDisconnected()
+        {
             Log("Lost connection to server.");
             StopNetworking();
         }

@@ -16,7 +16,6 @@ namespace Adapters.Character
         [SerializeField] MeshRenderer mainCapsule;
         [SerializeField][Min(0f)] float destructionWaitTime = 2f;
 
-
         [SerializeField] ParticleSystem spawnEffect;
         [SerializeField] ParticleSystem hitEffect;
         [SerializeField] ParticleSystem deathEffect;
@@ -28,6 +27,12 @@ namespace Adapters.Character
 
         public IPlayer player { get; private set; }
 
+        private void Update()
+        {
+            transform.position = Vector3.Lerp(transform.position, player.Position.ToUnityVector(), 0.8f);
+            transform.rotation = Quaternion.Slerp(transform.rotation, player.Rotation.ToUnityQuaternion(), 0.8f);
+        }
+
         public void Setup(IPlayer player, GameObject root)
         {
             this.player = player;
@@ -38,7 +43,7 @@ namespace Adapters.Character
             player.Destroyed += Destroy;
             player.HPReduced += Hit;
 
-            mainCapsule.material = player.LocalPlayer? localPlayerMaterial : networkedPlayerMaterial;
+            mainCapsule.material = player.LocalPlayer ? localPlayerMaterial : networkedPlayerMaterial;
             allRenderers = GetComponentsInChildren<MeshRenderer>();
             foreach (MeshRenderer renderer in allRenderers)
             {
@@ -81,6 +86,9 @@ namespace Adapters.Character
                 renderer.enabled = true;
             }
             spawnEffect.Play();
+
+            transform.position = player.Position.ToUnityVector();
+            transform.rotation = player.Rotation.ToUnityQuaternion();
         }
         void Die(IPlayer player)
         {
@@ -92,12 +100,6 @@ namespace Adapters.Character
                 renderer.enabled = false;
             }
             deathEffect.Play();
-        }
-
-        private void Update()
-        {
-            transform.position = Vector3.Lerp(transform.position, player.Position.ToUnityVector(), 0.8f);
-            transform.rotation = Quaternion.Slerp(transform.rotation, player.Rotation.ToUnityQuaternion(), 0.8f);
         }
     }
 }

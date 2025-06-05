@@ -1,9 +1,5 @@
 using Adapters.Character;
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class GameCanvas : MonoBehaviour
 {
@@ -11,7 +7,6 @@ public class GameCanvas : MonoBehaviour
     {
         PlayerView.PlayerInstantiated += PlayerInstantiated;
     }
-
 
     private void PlayerInstantiated(PlayerView player)
     {

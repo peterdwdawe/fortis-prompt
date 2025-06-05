@@ -5,6 +5,8 @@ namespace Shared.Player
 {
     public interface IPlayer : IDisposable
     {
+        //TODO();   //review these functions. This interface became huge and proabbly doesn't need to be
+
         event OnRequestShootHandler OnShootRequested;
         event Action<IPlayer> HPSet;
         event Action<IPlayer> Spawned;

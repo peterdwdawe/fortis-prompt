@@ -1,16 +1,9 @@
 ﻿using LiteNetLib;
-using LiteNetLib.Utils;
-using Shared.Networking;
 using Shared.Networking.Messages;
-using Shared.Player;
-using Shared.Projectiles;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Shared.Networking
 {
-
+    //TODO: try to get rid of all these generic type constraints in favor of interfaces
     public abstract class MessageHandler<TGameManager, TNetworkManager> : IMessageHandler
         where TGameManager : GameManager<TGameManager, TNetworkManager>
         where TNetworkManager : NetworkManager
@@ -22,10 +15,8 @@ namespace Shared.Networking
             this.gameManager = gameManager;
         }
 
-
         public void OnNetworkStart()
         {
-
             CustomMessage.Received += CustomMessage_Received;
 
             PlayerRegistrationMessage.Received += PlayerRegistrationMessage_Received;

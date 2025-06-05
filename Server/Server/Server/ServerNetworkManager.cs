@@ -1,25 +1,21 @@
-using System;
-using System.Net;
-using System.Net.Sockets;
 using LiteNetLib;
 using LiteNetLib.Utils;
 using Shared.Configuration;
 using Shared.Networking;
+using System;
+using System.Net;
 
 namespace Server
 {
     public class ServerNetworkManager : NetworkManager
     {
-        public ServerNetworkManager(NetworkState networkState, int port, GameConfig gameConfig) : base(networkState, port) 
+        public ServerNetworkManager(NetworkState networkState, int port) : base(networkState, port)
         {
-            this.gameConfig = gameConfig;
-        }
 
-        private readonly GameConfig gameConfig;
+        }
 
         protected override bool StartInternal()
         {
-
             if (!_netManager.Start(_port))
                 return false;
 
@@ -37,25 +33,13 @@ namespace Server
         {
             base.OnConnectionRequest(request);
 
-            if (_netManager.ConnectedPeersCount < gameConfig.MaxPlayers)
-                request.AcceptIfKey(NetworkingUtils.testNetworkKey);
+            if (_netManager.ConnectedPeersCount < networkState.config.MaxPlayers)
+                request.AcceptIfKey(networkState.config.testNetworkKey);
             else
                 request.Reject();
         }
 
-        public override void OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader, UnconnectedMessageType messageType)
-        {
-            base.OnNetworkReceiveUnconnected(remoteEndPoint, reader, messageType);
-
-            //TODO();// remove? also turn off discovery in start?
-            if (messageType == UnconnectedMessageType.Broadcast)
-            {
-                Log("Received discovery request. Send discovery response");
-                NetDataWriter resp = new NetDataWriter();
-                resp.Put(1);
-                _netManager.SendUnconnectedMessage(resp, remoteEndPoint);
-            }
-        }
+        #region Server Send Functions
 
         public void SendToAll(INetworkMessage message)
         {
@@ -120,5 +104,6 @@ namespace Server
             _dataWriter.Put(message);
             peer.Send(_dataWriter, DeliveryMethod.ReliableOrdered);
         }
+        #endregion
     }
 }

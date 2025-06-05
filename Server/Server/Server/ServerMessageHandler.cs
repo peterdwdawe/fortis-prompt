@@ -1,10 +1,7 @@
 ﻿using LiteNetLib;
-using LiteNetLib.Utils;
-using Shared.Networking.Messages;
 using Shared.Networking;
+using Shared.Networking.Messages;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Server
 {
@@ -18,6 +15,7 @@ namespace Server
 
         protected override void CustomMessage_Received(NetPeer peer, CustomMessage message)
         {
+            //Debug message, currently unused. this was just used to ping-pong messages, confirming that both client and server could send and receive
             //Console.WriteLine($"Server Received: {message.msg} from peer {peer.Id}");
             //gameManager.networkManager.SendTo(peer, message);
             //Console.WriteLine($"Server Sent: {message.msg} to peer {peer.Id}");
@@ -70,24 +68,15 @@ namespace Server
 
         public override void OnPeerConnected(NetPeer peer)
         {
-            Log("Peer Connected!");
+            //Log("Peer {peer.Id} Connected.");
             gameManager.InstantiateNetworkedPlayer(peer.Id);
-            //TODO(); //instantiate player
-            //    TODO(); //send local PlayerRegistrationMessage with peer.Id to sender
-            //    TODO(); //send networked PlayerRegistrationMessage with peer.Id to all others
-                //TODO(); //send PlayerSpawnMessage with all non-dead players to sender
-
             gameManager.SpawnPlayerAtRandomLocation(peer.Id);
-            //TODO(); //spawn player with maxHP
-            //    TODO(); //send PlayerSpawnMessage with peer.Id to all
         }
 
         public override void OnPeerDisconnected(NetPeer peer)
         {
             gameManager.DestroyPlayer(peer.Id);
             gameManager.OnPeerDisconnected();
-            //TODO(); //Destroy Player
-            //    TODO(); //send message to all remaining peers
         }
     }
 }

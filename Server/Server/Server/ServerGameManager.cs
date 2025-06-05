@@ -1,19 +1,17 @@
 ﻿using LiteNetLib;
 using Shared;
-using Shared.Configuration;
 using Shared.Input;
 using Shared.Networking;
 using Shared.Networking.Messages;
 using Shared.Player;
 using Shared.Projectiles;
 using System;
-using System.IO;
 using System.Numerics;
 using System.Text.Json;
 
 namespace Server
 {
-    public class ServerGameManager : GameManager<ServerGameManager,ServerNetworkManager>, INetLogger
+    public class ServerGameManager : GameManager<ServerGameManager, ServerNetworkManager>, INetLogger
     {
         protected override MessageHandler<ServerGameManager, ServerNetworkManager> GenerateMessageHandler()
         {
@@ -23,14 +21,13 @@ namespace Server
 
         protected override ServerNetworkManager GenerateNetworkManager()
         {
-            return new ServerNetworkManager(networkState, serverPort, gameConfig);
+            return new ServerNetworkManager(networkState, serverPort);
         }
 
         protected override void Log(string message)
         {
             Console.WriteLine(message);
         }
-
 
         void INetLogger.WriteNet(NetLogLevel level, string str, params object[] args)
         {
@@ -41,7 +38,7 @@ namespace Server
         {
             Log("Create New Player!");
 
-            var player =  new ServerPlayer(ID, inputListener, local, playerConfig, networkConfig);
+            var player = new ServerPlayer(ID, inputListener, local, playerConfig, networkConfig);
 
             player.Spawned += OnPlayerSpawn;
             player.Died += OnPlayerDied;
@@ -55,12 +52,12 @@ namespace Server
                     continue;
                 networkManager.SendTo(ID, new PlayerRegistrationMessage(otherPlayer.ID, false));
                 networkManager.SendTo(ID, new HealthUpdateMessage(otherPlayer.ID, otherPlayer.HP));
-                if(otherPlayer.HP > 0)
+                if (otherPlayer.HP > 0)
                 {
                     networkManager.SendTo(ID, new PlayerSpawnMessage(otherPlayer.ID, otherPlayer.Position, otherPlayer.Rotation));
                 }
             }
-            foreach(var projectile in AllProjectiles)
+            foreach (var projectile in AllProjectiles)
             {
                 networkManager.SendTo(ID, new ProjectileSpawnMessage(projectile.ID, projectile.ownerID, projectile.Position, projectile.Direction));
             }
@@ -74,18 +71,16 @@ namespace Server
         {
             return new Vector3
                 (
-                (Random.Shared.NextSingle() * 8f) - 4f, 
-                1f, 
+                (Random.Shared.NextSingle() * 8f) - 4f,
+                1f,
                 (Random.Shared.NextSingle() * 8f) - 4f
                 );
         }
 
         public override void DestroyPlayer(int ID)
         {
-            if(TryGetPlayer(ID, out var player))
+            if (TryGetPlayer(ID, out var player))
             {
-
-
                 player.Spawned -= OnPlayerSpawn;
                 player.Died -= OnPlayerDied;
                 player.HPSet -= OnPlayerHPSet;
@@ -165,7 +160,7 @@ namespace Server
 
             foreach (var player in AllPlayers)
             {
-                if (player.ID == projectile.ownerID || !player.Alive) 
+                if (player.ID == projectile.ownerID || !player.Alive)
                 {
                     continue;
                 }
@@ -220,35 +215,15 @@ namespace Server
 
         public void OnPeerDisconnected()
         {
-            if(networkManager.GetPeerCount() < 1)
+            if (networkManager.GetPeerCount() < 1)
             {
                 Log("All clients disconnected. Cleaning up game data.");
                 Cleanup();
             }
         }
 
-        //protected override NetworkConfig LoadNetworkConfig()
-        //{
-        //    return TODO();
-        //}
-
-        //protected override PlayerConfig LoadPlayerConfig()
-        //{
-        //    return TODO();
-        //}
-
-        //protected override ProjectileConfig LoadProjectileConfig()
-        //{
-        //    return TODO();
-        //}
-
-        //protected override GameConfig LoadGameConfig()
-        //{
-        //    return TODO();
-        //}
-
-        public bool StartServer(int port) 
-        { 
+        public bool StartServer(int port)
+        {
             serverPort = port;
             return StartNetworkingInternal();
         }

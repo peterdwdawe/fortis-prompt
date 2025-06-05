@@ -25,5 +25,8 @@ namespace Shared.Networking
     }
 
     public interface INetworkMessage<TMessage> : INetworkMessage, System.IEquatable<TMessage>
-        where TMessage : struct, INetworkMessage<TMessage> { }
+        where TMessage : struct, INetworkMessage<TMessage>
+    {
+    
+    }
 }
