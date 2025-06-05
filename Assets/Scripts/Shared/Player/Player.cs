@@ -17,6 +17,7 @@ namespace Shared.Player
         public event OnRequestShootHandler OnShootRequested;
         public event Action<IPlayer> OnUpdateRequested;
         public event Action<IPlayer> HPSet;
+        public event Action<IPlayer> HPReduced;
         public event Action<IPlayer> Spawned;
         public event Action<IPlayer> Died;
         public event Action<IPlayer> Destroyed;
@@ -43,7 +44,7 @@ namespace Shared.Player
             //_inputListener.OnShootNetworked += HandleShootNetworked;
             _inputListener.OnShootLocal += RequestShootNetworked;
             _inputListener.OnTransformUpdated += UpdateTransform;
-            HP = PlayerConfig.MaxHP;
+            HP = 0;
             LocalPlayer = localPlayer;
             _lastMovementDirection = Vector3.UnitZ;
         }
@@ -137,8 +138,14 @@ namespace Shared.Player
 
         public void SetHP(int HP)
         {
+            bool reduced = HP < this.HP;
+
             this.HP = HP;
+
             HPSet?.Invoke(this);
+
+            if (reduced)
+                HPReduced?.Invoke(this);
         }
 
         public void Spawn(Vector3 position, Quaternion rotation)

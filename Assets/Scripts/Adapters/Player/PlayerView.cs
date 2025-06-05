@@ -13,8 +13,16 @@ namespace Adapters.Character
 
         [SerializeField] Material localPlayerMaterial;
         [SerializeField] Material networkedPlayerMaterial;
-        [SerializeField] Renderer mainCapsule;
-        Renderer[] allRenderers;
+        [SerializeField] MeshRenderer mainCapsule;
+        [SerializeField][Min(0f)] float destructionWaitTime = 2f;
+
+
+        [SerializeField] ParticleSystem spawnEffect;
+        [SerializeField] ParticleSystem hitEffect;
+        [SerializeField] ParticleSystem deathEffect;
+        [SerializeField] ParticleSystem destroyEffect;
+
+        MeshRenderer[] allRenderers;
 
         GameObject root;
 
@@ -28,10 +36,11 @@ namespace Adapters.Character
             player.Died += Die;
             player.Spawned += Spawn;
             player.Destroyed += Destroy;
+            player.HPReduced += Hit;
 
             mainCapsule.material = player.LocalPlayer? localPlayerMaterial : networkedPlayerMaterial;
-            allRenderers = GetComponentsInChildren<Renderer>();
-            foreach (Renderer renderer in allRenderers)
+            allRenderers = GetComponentsInChildren<MeshRenderer>();
+            foreach (MeshRenderer renderer in allRenderers)
             {
                 renderer.enabled = false;
             }
@@ -44,28 +53,45 @@ namespace Adapters.Character
             player.Died -= Die;
             player.Spawned -= Spawn;
             player.Destroyed -= Destroy;
+            player.HPReduced -= Hit;
             this.player = null;
+            enabled = false;
 
-            Destroy(root);
+            foreach (MeshRenderer renderer in allRenderers)
+            {
+                renderer.enabled = false;
+            }
+            destroyEffect.Play();
+
+            Destroy(root, destructionWaitTime);
+            Destroy(this);
         }
+
+        private void Hit(IPlayer player)
+        {
+            hitEffect.Play();
+        }
+
         void Spawn(IPlayer player)
         {
             PlayerSpawned?.Invoke();
             enabled = true;
-            foreach (Renderer renderer in allRenderers)
+            foreach (MeshRenderer renderer in allRenderers)
             {
                 renderer.enabled = true;
             }
+            spawnEffect.Play();
         }
         void Die(IPlayer player)
         {
             Debug.Log("PlayerDied!");
             PlayerDied?.Invoke();
             enabled = false;
-            foreach (Renderer renderer in allRenderers)
+            foreach (MeshRenderer renderer in allRenderers)
             {
                 renderer.enabled = false;
             }
+            deathEffect.Play();
         }
 
         private void Update()

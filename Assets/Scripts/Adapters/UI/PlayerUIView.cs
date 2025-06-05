@@ -16,6 +16,7 @@ public class PlayerUIView : MonoBehaviour
     GameObject root;
     Camera cam;
     RectTransform rectTransform;
+    RectTransform parentRectTransform;
 
     internal void Setup(GameObject root, PlayerView player)
     {
@@ -38,6 +39,7 @@ public class PlayerUIView : MonoBehaviour
     private void Awake()
     {
         rectTransform = transform as RectTransform;
+        parentRectTransform = rectTransform.parent as RectTransform;
     }
 
     private void SetHP(IPlayer player)
@@ -66,6 +68,11 @@ public class PlayerUIView : MonoBehaviour
 
     private void LateUpdate()
     {
-        rectTransform.anchoredPosition = RectTransformUtility.WorldToScreenPoint(cam, player.transform.position + positionOffset);
+        Vector3 screenPoint = cam.WorldToScreenPoint(player.transform.position + positionOffset);
+        screenPoint.z = 0;
+
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(parentRectTransform, screenPoint, null, out Vector2 scaledScreenPos);
+
+        rectTransform.anchoredPosition = scaledScreenPos;
     }
 }

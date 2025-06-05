@@ -12,6 +12,7 @@ namespace Shared.Player
         event Action<IPlayer> Destroyed;
         event Action<IPlayer> RespawnRequested;
         event Action<IPlayer> OnUpdateRequested;
+        event Action<IPlayer> HPReduced;
 
         Vector3 Position { get; }
         Quaternion Rotation { get; }
