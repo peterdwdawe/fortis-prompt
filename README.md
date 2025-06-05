@@ -56,14 +56,17 @@
 
   
 ## To-Do List
-- [ ] Code Quality
+- Readme Roadmap
+
+- Code Quality
   - [ ] Clean up unused functions
   - [ ] Merge common client/server functions
   - [ ] Abstract into interfaces as much as possible, reduce references to concrete classes
   - [ ] Improve configs - maybe just create a basic JSON/XML file for all settings? If I have time, an editor window in Unity would be great
   - [ ] Refactor to use composition as much as possible vs inheritence
   - [ ] Sort functions, properties, events, etc. consistently across classes to improve readability
-- [ ] Features
+
+- Features
   - [ ] Expand on unit tests
   - [ ] Player collision, if time permits
   - [ ] Bots, if time permits
