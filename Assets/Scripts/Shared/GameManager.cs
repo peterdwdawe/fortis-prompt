@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
+using Shared.Configuration;
 using Shared.Input;
 using Shared.Networking;
 using Shared.Player;
@@ -15,6 +14,11 @@ namespace Shared
         where TGameManager : GameManager<TGameManager, TNetworkManager>
         where TNetworkManager : NetworkManager
     {
+        protected const string gameConfigPath = "GameConfig.json";
+
+        protected const string networkConfigPath = "NetworkConfig.json";
+        protected const string playerConfigPath = "PlayerConfig.json";
+        protected const string projectileConfigPath = "ProjectileConfig.json";
         //private Player.Player _player;
         //private List<Player.Player> _players = new List<Player.Player>();
         //private List<IProjectile> _projectiles = new List<IProjectile>();
@@ -29,6 +33,12 @@ namespace Shared
         //    _players.Add(player);
         //    PlayerInstantiated?.Invoke(player);
         //}
+
+        //protected abstract NetworkConfig LoadNetworkConfig();
+        //protected abstract PlayerConfig LoadPlayerConfig();
+        //protected abstract ProjectileConfig LoadProjectileConfig();
+        //protected abstract GameConfig LoadGameConfig();
+
 
         protected abstract TNetworkManager GenerateNetworkManager();
         protected abstract MessageHandler<TGameManager, TNetworkManager> GenerateMessageHandler();
@@ -57,13 +67,13 @@ namespace Shared
         public NetworkManager.NetworkStatistics GetNetworkStatistics()
             => networkManager != null ? networkManager.GetStatistics() : NetworkManager.NetworkStatistics.Empty;
 
-        public bool StartNetworking(string address)
+        protected bool StartNetworkingInternal()
         {
             StopNetworking();
 
             networkManager = GenerateNetworkManager();
             var messageHandler = GenerateMessageHandler();
-            if (!networkManager.Start(address, messageHandler))
+            if (!networkManager.Start(messageHandler))
             {
                 Log("Failed to start networking!");
                 networkManager = null;
@@ -96,18 +106,18 @@ namespace Shared
 
             //Log("Tick!");
 
-            NetworkState.Tick();
+            networkState.Tick();
 
             networkManager.PollEvents();
 
             if (networkManager == null) //PollEvents can make us close connection - we need to check here again to make sure we're still in-game.
                 return;
 
-            var networkState = networkManager.CheckConnectionState(out bool stateChanged);
+            var connectionState = networkManager.CheckConnectionState(out bool stateChanged);
             if (stateChanged)
-                StateChanged?.Invoke(networkState);
+                StateChanged?.Invoke(connectionState);
 
-            if (networkState != NetworkManager.ConnectionState.Connected)
+            if (connectionState != NetworkManager.ConnectionState.Connected)
                 return;
 
             foreach (var player in playerLookup.Values)
@@ -133,11 +143,30 @@ namespace Shared
         Dictionary<int, IProjectile> projectileLookup;
         Dictionary<int, NetworkedInputListener> networkedInputListenerLookup;
 
+        public readonly NetworkConfig networkConfig;
+        public readonly GameConfig gameConfig;
+        public readonly PlayerConfig playerConfig;
+        public readonly ProjectileConfig projectileConfig;
+        public readonly NetworkState networkState;
+
         public GameManager()
         {
-            playerLookup = new Dictionary<int, IPlayer>(NetworkConfig.MaxConnectionCount);
-            projectileLookup = new Dictionary<int, IProjectile>(NetworkConfig.MaxConnectionCount * 16);
-            networkedInputListenerLookup = new Dictionary<int, NetworkedInputListener>(NetworkConfig.MaxConnectionCount);
+
+            //networkConfig = LoadNetworkConfig();
+            //gameConfig = LoadGameConfig();
+            //playerConfig = LoadPlayerConfig();
+            //projectileConfig = LoadProjectileConfig();
+
+            networkConfig = LoadConfig<NetworkConfig>(networkConfigPath);
+            gameConfig = LoadConfig<GameConfig>(gameConfigPath);
+            playerConfig = LoadConfig<PlayerConfig>(playerConfigPath);
+            projectileConfig = LoadConfig<ProjectileConfig>(projectileConfigPath);
+
+            networkState = new NetworkState(networkConfig);
+
+            playerLookup = new Dictionary<int, IPlayer>(gameConfig.MaxPlayers);
+            projectileLookup = new Dictionary<int, IProjectile>(gameConfig.MaxPlayers * 16);
+            networkedInputListenerLookup = new Dictionary<int, NetworkedInputListener>(gameConfig.MaxPlayers);
         }
 
         protected bool TryGetPlayer(int ID, out IPlayer player)
@@ -328,5 +357,30 @@ namespace Shared
 
 
         public virtual void OnServerDisconnected() { }
+
+        protected T LoadConfig<T>(string path) where T : class, new()
+        {
+            T config;
+            string jsonString;
+            if (File.Exists(path))
+            {
+                jsonString = File.ReadAllText(path);
+                config = Deserialize<T>(jsonString);
+
+                if (config != null)
+                    return config;
+            }
+
+            Log($"Failed to load {typeof(T)} from disk. Generating a new {path} file.");
+
+            config = new T();
+            jsonString = Serialize(config);
+            File.WriteAllText(path, jsonString);
+
+            return config;
+        }
+
+        protected abstract T Deserialize<T>(string jsonString) where T : class;
+        protected abstract string Serialize<T>(T obj) where T : new();
     }
 }

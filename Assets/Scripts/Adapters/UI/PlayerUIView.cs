@@ -29,7 +29,7 @@ public class PlayerUIView : MonoBehaviour
         player.PlayerDestroyed += PlayerDestroyed;
         player.player.HPSet += SetHP;
 
-        hpSlider.maxValue = PlayerConfig.MaxHP;
+        hpSlider.maxValue = player.player.MaxHP;
         hpSlider.minValue = 0;
         hpSlider.value = player.player.HP;
         canvasGroup.alpha = 0f;

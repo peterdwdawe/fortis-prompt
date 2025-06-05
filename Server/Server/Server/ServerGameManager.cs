@@ -1,12 +1,15 @@
 ﻿using LiteNetLib;
 using Shared;
+using Shared.Configuration;
 using Shared.Input;
 using Shared.Networking;
 using Shared.Networking.Messages;
 using Shared.Player;
 using Shared.Projectiles;
 using System;
+using System.IO;
 using System.Numerics;
+using System.Text.Json;
 
 namespace Server
 {
@@ -16,10 +19,11 @@ namespace Server
         {
             return new ServerMessageHandler(this);
         }
+        private int serverPort;
 
         protected override ServerNetworkManager GenerateNetworkManager()
         {
-            return new ServerNetworkManager(NetworkConfig.Port, NetworkConfig.TickInterval);
+            return new ServerNetworkManager(networkState, serverPort, gameConfig);
         }
 
         protected override void Log(string message)
@@ -37,7 +41,7 @@ namespace Server
         {
             Log("Create New Player!");
 
-            var player =  new ServerPlayer(ID, inputListener, local);
+            var player =  new ServerPlayer(ID, inputListener, local, playerConfig, networkConfig);
 
             player.Spawned += OnPlayerSpawn;
             player.Died += OnPlayerDied;
@@ -104,7 +108,7 @@ namespace Server
         }
         public void SpawnPlayerAtRandomLocation(IPlayer player)
         {
-            player.SetHP(PlayerConfig.MaxHP);
+            player.SetHP(playerConfig.MaxHP);
             player.Spawn(GetRandomSpawnPosition(player), Quaternion.Identity);
         }
 
@@ -129,7 +133,7 @@ namespace Server
 
         protected override Projectile CreateNewProjectile(int ID, int ownerID, System.Numerics.Vector3 position, System.Numerics.Vector3 direction)
         {
-            var projectile = new ServerProjectile(ID, ownerID, position, direction);
+            var projectile = new ServerProjectile(ID, ownerID, position, direction, projectileConfig, networkConfig);
 
             projectile.Destroyed += OnProjectileDestroyed;
             projectile.Moved += OnProjectileMoved;
@@ -149,7 +153,7 @@ namespace Server
             if (CollisionCheck(projectile, out var hitPlayer))
             {
                 projectile.Destroy();
-                hitPlayer.SetHP(hitPlayer.HP - ProjectileConfig.Damage);
+                hitPlayer.SetHP(hitPlayer.HP - projectileConfig.Damage);
             }
         }
 
@@ -157,7 +161,7 @@ namespace Server
         {
             hitPlayer = null;
             bool foundPlayer = false;
-            float targetSqrDist = PlayerConfig.Radius * PlayerConfig.Radius;
+            float targetSqrDist = playerConfig.Radius * playerConfig.Radius;
 
             foreach (var player in AllPlayers)
             {
@@ -221,6 +225,42 @@ namespace Server
                 Log("All clients disconnected. Cleaning up game data.");
                 Cleanup();
             }
+        }
+
+        //protected override NetworkConfig LoadNetworkConfig()
+        //{
+        //    return TODO();
+        //}
+
+        //protected override PlayerConfig LoadPlayerConfig()
+        //{
+        //    return TODO();
+        //}
+
+        //protected override ProjectileConfig LoadProjectileConfig()
+        //{
+        //    return TODO();
+        //}
+
+        //protected override GameConfig LoadGameConfig()
+        //{
+        //    return TODO();
+        //}
+
+        public bool StartServer(int port) 
+        { 
+            serverPort = port;
+            return StartNetworkingInternal();
+        }
+
+        protected override T Deserialize<T>(string jsonString) where T : class
+        {
+            return JsonSerializer.Deserialize<T>(jsonString);
+        }
+
+        protected override string Serialize<T>(T obj)
+        {
+            return JsonSerializer.Serialize(obj, new JsonSerializerOptions { WriteIndented = true });
         }
     }
 }

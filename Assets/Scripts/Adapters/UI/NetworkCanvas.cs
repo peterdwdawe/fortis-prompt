@@ -25,6 +25,7 @@ public class NetworkCanvas : MonoBehaviour
     [SerializeField] TextMeshProUGUI status;
     [SerializeField] TextMeshProUGUI statistics;
     [SerializeField] TMP_InputField serverAddress;
+    [SerializeField] TMP_InputField serverPort;
     [SerializeField] LogGroup logUI;
 
     const string statusPrefix = "<b>Status:</b> ";
@@ -63,8 +64,12 @@ public class NetworkCanvas : MonoBehaviour
 
     public void StartClient()
     {
-        //TODO: ignore / make non-interactable if client already started
-        gameManager.StartClient(serverAddress.text);
+        if(!int.TryParse(serverPort.text, out var port)){
+            LogUI($"{serverPort.text} is not a valid port number. using default port: 5000");
+            port = 5000;
+        }
+
+        gameManager.StartClient(serverAddress.text, port);
         ShowInGameMenu();
     }
 

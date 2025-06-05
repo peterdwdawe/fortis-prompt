@@ -4,6 +4,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using Shared.Configuration;
 using Shared.Input;
 using Shared.Player;
 
@@ -31,19 +32,27 @@ namespace Shared.Player
         public Vector3 Position { get; private set; }
         public Quaternion Rotation { get; private set; }
 
-        uint lastUpdateTick = 0;
+        uint ticksSinceLastUpdate = 0;
 
         public int HP { get; private set; } = 0;
+        public int MaxHP => playerConfig.MaxHP;
 
         public bool LocalPlayer { get; private set; }
 
-        public Player(int id, IInputListener inputListener, bool localPlayer)
+        protected readonly PlayerConfig playerConfig;
+        protected readonly NetworkConfig networkConfig;
+
+        public Player(int id, IInputListener inputListener, bool localPlayer, PlayerConfig playerConfig, NetworkConfig networkConfig)
         {
             ID = id;
+
             _inputListener = inputListener;
-            //_inputListener.OnShootNetworked += HandleShootNetworked;
             _inputListener.OnShootLocal += RequestShootNetworked;
             _inputListener.OnTransformUpdated += UpdateTransform;
+
+            this.playerConfig = playerConfig;
+            this.networkConfig = networkConfig;
+
             HP = 0;
             LocalPlayer = localPlayer;
             _lastMovementDirection = Vector3.UnitZ;
@@ -93,7 +102,7 @@ namespace Shared.Player
 
             LastInput = Vector2.Normalize(LastInput);
 
-            Vector3 movement = new Vector3(LastInput.X, 0, LastInput.Y) * (PlayerConfig.MovementSpeed * NetworkConfig.TickInterval);
+            Vector3 movement = new Vector3(LastInput.X, 0, LastInput.Y) * (playerConfig.MovementSpeed * networkConfig.TickInterval);
 
             if (movement == Vector3.Zero)
             {
@@ -109,24 +118,24 @@ namespace Shared.Player
             Rotation = Quaternion.Slerp(
                 Rotation,
                 Quaternion.CreateFromAxisAngle(Vector3.UnitY, yaw),
-                PlayerConfig.RotationSpeed
+                playerConfig.RotationSpeed
             );
         }
 
         protected virtual void TickAlive()
         {
             UpdateTransform();
-
-            if(LocalPlayer && NetworkState.CurrentTick - lastUpdateTick > NetworkConfig.PlayerUpdateTickCount)
+            ticksSinceLastUpdate++;
+            if (LocalPlayer && ticksSinceLastUpdate >= networkConfig.PlayerUpdateTickCount)
             {
                 OnUpdateRequested?.Invoke(this);
-                lastUpdateTick = NetworkState.CurrentTick;
+                ticksSinceLastUpdate = 0;
             }
         }
 
         protected virtual void TickDead()
         {
-
+            ticksSinceLastUpdate = 0;
         }
 
         public void Dispose()

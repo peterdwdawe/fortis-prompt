@@ -1,5 +1,6 @@
 ﻿using LiteNetLib;
 using LiteNetLib.Utils;
+using Shared.Configuration;
 using Shared.Networking;
 using System;
 using System.Net;
@@ -11,18 +12,18 @@ namespace Shared.Networking
     {
 
         protected readonly int _port;
-        protected readonly int _updateTime;
         protected NetDataWriter _dataWriter;
         protected NetManager _netManager;
+        protected NetworkState networkState;
 
         public bool started { get; private set; } = false;
 
         //public event Action<NetPeer, INetworkMessage> MessageReceived;
 
-        public NetworkManager(int port, float tickInterval)
+        public NetworkManager(NetworkState networkState, int port)
         {
+            this.networkState = networkState;
             _port = port;
-            _updateTime = Math.Max(1, (int)tickInterval * 1000);
         }
 
         public bool IsConnected()
@@ -47,11 +48,13 @@ namespace Shared.Networking
             public readonly long BytesReceived;
             public readonly float TimeElapsed;
 
+            const float minReportedTimeElapsed = 0.1f;  //avoid divide by zero or huge numbers for first few frames
+
             public NetworkStatistics(long bytesSent, long bytesReceived, float timeElapsed)
             {
                 BytesSent = bytesSent;
                 BytesReceived = bytesReceived;
-                TimeElapsed = MathF.Max(timeElapsed, NetworkConfig.TickInterval);
+                TimeElapsed = MathF.Max(timeElapsed, minReportedTimeElapsed);
             }
 
             public float AvgBandwidthUp => BytesSent / TimeElapsed;
@@ -63,21 +66,21 @@ namespace Shared.Networking
             return new NetworkStatistics(
                 _netManager != null ? _netManager.Statistics.BytesSent : 0,
                 _netManager != null ? _netManager.Statistics.BytesReceived : 0,
-                NetworkState.CurrentTime
+                networkState.CurrentTime
                 );
         }
 
         public int GetPeerCount()
             => _netManager != null ? _netManager.ConnectedPeersCount : 0;
 
-        public bool Start(string address, IMessageHandler messageHandler)
+        public bool Start(IMessageHandler messageHandler)
         {
             if (started)
                 return false;
 
             _dataWriter = new NetDataWriter();
             _netManager = new NetManager(this);
-            _netManager.UpdateTime = _updateTime;
+            _netManager.UpdateTime = networkState.config.TickIntervalMS;
             _netManager.EnableStatistics = true;
 
             _messageHandler = messageHandler;
@@ -90,7 +93,7 @@ namespace Shared.Networking
                 _messageHandler.OnNetworkStart();
             }
 
-            if (!StartInternal(address))
+            if (!StartInternal())
             {
                 if (_messageHandler != null)
                 {
@@ -104,11 +107,11 @@ namespace Shared.Networking
                 return false;
             }
             started = true;
-            NetworkState.SetCurrentTick(0);
+            networkState.SetCurrentTick(0);
             return true;
         }
 
-        protected abstract bool StartInternal(string address);
+        protected abstract bool StartInternal();
 
         public void Stop()
         {
@@ -130,7 +133,7 @@ namespace Shared.Networking
                 _netManager.Stop();
 
                 started = false;
-                NetworkState.SetCurrentTick(0);
+                networkState.SetCurrentTick(0);
             }
         }
         protected abstract void Log(string str);
@@ -163,6 +166,8 @@ namespace Shared.Networking
 
         public virtual void OnPeerDisconnected(NetPeer peer, DisconnectInfo disconnectInfo)
         {
+            string peerName = peer != null ? $"{peer.Id} ({peer})" : "Null connection";
+
             Log($"{peer.Id} ({peer}) Disconnected: {disconnectInfo.Reason}");
             OnDisconnected?.Invoke(peer);
         }

@@ -23,3 +23,6 @@ C:\repos\fortis-prompt\Assets\Plugins\Shared\Release\netstandard2.1\Shared_Lib.p
 C:\repos\fortis-prompt\Assets\Scripts\Shared\bin\Release\netstandard2.1\Shared_Lib.deps.json
 C:\repos\fortis-prompt\Assets\Scripts\Shared\bin\Release\netstandard2.1\Shared_Lib.dll
 C:\repos\fortis-prompt\Assets\Scripts\Shared\bin\Release\netstandard2.1\Shared_Lib.pdb
+C:\repos\fortis-prompt\Shared\Release\netstandard2.1\Shared_Lib.deps.json
+C:\repos\fortis-prompt\Shared\Release\netstandard2.1\Shared_Lib.dll
+C:\repos\fortis-prompt\Shared\Release\netstandard2.1\Shared_Lib.pdb

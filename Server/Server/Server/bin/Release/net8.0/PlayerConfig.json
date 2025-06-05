@@ -1,0 +1,7 @@
+{
+  "MovementSpeed": 4,
+  "RotationSpeed": 0.25,
+  "Radius": 0.5,
+  "MaxHP": 100,
+  "RespawnTime": 5
+}

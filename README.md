@@ -30,12 +30,11 @@
 - [X] Movement + Prediction
 - [X] Projectile Instantiation, Simulation & Destruction (Not Including Hit detection)
 - [X] Character Spawn/Despawn Logic
-- [ ] Easy-To-Edit Configurations
-  - [ ] Player Attributes - Speed, Size, etc.
-  - [ ] Projectile Attributes - Speed, Damage, etc.
-  - [ ] Game Configuration (Should this be sent to player on connection?) - Respawn Time, Max Player Count,
-  - [ ] Network Configuration (Should this be sent to player on connection?) - Tick Interval, Player Update Frequency
-  - [ ] Connection Configuration? - Network Address, Port
+- [X] Easy-To-Edit Configurations
+  - [X] Player Attributes - Speed, Size, etc.
+  - [X] Projectile Attributes - Speed, Damage, etc.
+  - [X] Game Configuration - Respawn Time, Max Player Count,
+  - [X] Network Configuration - Tick Interval, Player Update Frequency
 
 ### Nice To Have:
 - [X] Bandwidth Usage Reporting _currently only visible from client_
@@ -62,11 +61,14 @@
   - [ ] Clean up unused functions
   - [ ] Merge common client/server functions
   - [ ] Abstract into interfaces as much as possible, reduce references to concrete classes
-  - [ ] Improve configs - maybe just create a basic JSON/XML file for all settings? If I have time, an editor window in Unity would be great
   - [ ] Refactor to use composition as much as possible vs inheritence
   - [ ] Sort functions, properties, events, etc. consistently across classes to improve readability
+  - [ ] Add/Improve Comments
 
 - Features
   - [ ] Expand on unit tests
   - [ ] Player collision, if time permits
   - [ ] Bots, if time permits
+  - [ ] Improve configs 
+    - [ ] If I have time, an editor window in Unity would be great
+    - [ ] Maybe store configs on server side only, and send them over to client when connecting to ensure sync?

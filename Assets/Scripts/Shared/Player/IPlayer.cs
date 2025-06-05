@@ -17,7 +17,8 @@ namespace Shared.Player
         Vector3 Position { get; }
         Quaternion Rotation { get; }
         int ID { get; }
-        int HP { get;}
+        int HP { get; }
+        int MaxHP { get; }
         bool Alive { get; }
         bool LocalPlayer { get; }
         Vector2 LastInput { get; }

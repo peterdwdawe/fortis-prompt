@@ -45,9 +45,9 @@ namespace Adapters
             _manager.Tick();
         }
 
-        public void StartClient(string address)
+        public void StartClient(string address, int port)
         {
-            _manager.StartNetworking(address);
+            _manager.ConnectToServer(address, port);
         }
 
         public void StopClient()

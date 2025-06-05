@@ -3,16 +3,21 @@ using System.Net;
 using System.Net.Sockets;
 using LiteNetLib;
 using LiteNetLib.Utils;
+using Shared.Configuration;
 using Shared.Networking;
 
 namespace Server
 {
     public class ServerNetworkManager : NetworkManager
     {
-        public ServerNetworkManager(int port, float tickInterval) : base(port, tickInterval) { }
+        public ServerNetworkManager(NetworkState networkState, int port, GameConfig gameConfig) : base(networkState, port) 
+        {
+            this.gameConfig = gameConfig;
+        }
 
+        private readonly GameConfig gameConfig;
 
-        protected override bool StartInternal(string address)
+        protected override bool StartInternal()
         {
 
             if (!_netManager.Start(_port))
@@ -32,24 +37,10 @@ namespace Server
         {
             base.OnConnectionRequest(request);
 
-            if (_netManager.ConnectedPeersCount < NetworkConfig.MaxConnectionCount)
+            if (_netManager.ConnectedPeersCount < gameConfig.MaxPlayers)
                 request.AcceptIfKey(NetworkingUtils.testNetworkKey);
             else
                 request.Reject();
-        }
-
-        public override void OnPeerConnected(NetPeer peer)
-        {
-            base.OnPeerConnected(peer);
-
-            PeerLookup.OnPeerConnected(peer);
-        }
-
-        public override void OnPeerDisconnected(NetPeer peer, DisconnectInfo disconnectInfo)
-        {
-            base.OnPeerDisconnected(peer, disconnectInfo);
-
-            PeerLookup.OnPeerDisconnected(peer);
         }
 
         public override void OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader, UnconnectedMessageType messageType)

@@ -2,22 +2,28 @@
 using UnityEngine;
 using LiteNetLib;
 using Shared.Networking;
+using Shared.Configuration;
 
 namespace Adapters.Networking
 {
     public class ClientNetworkManager : NetworkManager
     {
-        public ClientNetworkManager(int port, float tickInterval) : base(port, tickInterval) { }
+        private readonly string serverAddress;
 
-        protected override bool StartInternal(string address)
+        public ClientNetworkManager(NetworkState networkState, int serverPort, string serverAddress) : base(networkState, serverPort)
+        {
+            this.serverAddress = serverAddress;
+        }
+
+        protected override bool StartInternal()
         {
             _netManager.UnconnectedMessagesEnabled = true;
 
             if (!_netManager.Start())
                 return false;
 
-            Log($"Attempting connection to {address} (Port {_port})");
-            _netManager.Connect(address, _port, NetworkingUtils.testNetworkKey);
+            Log($"Attempting connection to {serverAddress} (Port {_port})");
+            _netManager.Connect(serverAddress, _port, NetworkingUtils.testNetworkKey);
             return true;
         }
 

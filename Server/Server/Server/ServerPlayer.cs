@@ -1,4 +1,5 @@
-﻿using Shared.Input;
+﻿using Shared.Configuration;
+using Shared.Input;
 using Shared.Player;
 using System;
 using System.Collections.Generic;
@@ -10,24 +11,27 @@ namespace Server
 {
     internal class ServerPlayer : Player
     {
-        public ServerPlayer(int id, IInputListener inputListener, bool local) : base(id, inputListener, local)
-        {
+        private int deadTick = 0;
+        private readonly int respawnWaitTicks;
 
+        public ServerPlayer(int id, IInputListener inputListener, bool localPlayer, PlayerConfig playerConfig, NetworkConfig networkConfig) 
+            : base(id, inputListener, localPlayer, playerConfig, networkConfig)
+        {
+            respawnWaitTicks = (int) (playerConfig.RespawnTime / networkConfig.TickInterval);
         }
-        float respawnTimer = 0f;
 
         protected override void TickAlive()
         {
             base.TickAlive();
-            respawnTimer = 0f;
+            deadTick = 0;
         }
 
         protected override void TickDead()
         {
             base.TickDead();
-            respawnTimer += NetworkConfig.TickInterval;
+            deadTick++;
 
-            if(respawnTimer >= PlayerConfig.RespawnTime)
+            if (deadTick >= respawnWaitTicks)
             {
                 RequestRespawn();
             }

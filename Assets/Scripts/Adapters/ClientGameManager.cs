@@ -3,11 +3,13 @@ using Adapters.Input;
 using Adapters.Networking;
 using Adapters.Projectiles;
 using Shared;
+using Shared.Configuration;
 using Shared.Input;
 using Shared.Networking;
 using Shared.Networking.Messages;
 using Shared.Player;
 using Shared.Projectiles;
+using System.IO;
 using UnityEngine;
 
 namespace Adapters
@@ -19,13 +21,18 @@ namespace Adapters
 
         protected override ClientNetworkManager GenerateNetworkManager()
         {
-            return new ClientNetworkManager(NetworkConfig.Port, NetworkConfig.TickInterval);
+            var manager = new ClientNetworkManager(networkState, serverPort, serverAddress);
+
+            return manager;
         }
 
         protected override MessageHandler<ClientGameManager, ClientNetworkManager> GenerateMessageHandler()
         {
             return new ClientMessageHandler(this);
         }
+
+        private string serverAddress;
+        private int serverPort;
 
         public ClientGameManager(LocalInputListener localInputListener) : base()
         {
@@ -84,17 +91,39 @@ namespace Adapters
 
         protected override Player CreateNewPlayer(int ID, IInputListener inputListener, bool local)
         {
-            return new Player(ID, inputListener, local);
+            return new Player(ID, inputListener, local, playerConfig, networkConfig);
         }
 
         protected override Projectile CreateNewProjectile(int ID, int ownerID, System.Numerics.Vector3 position, System.Numerics.Vector3 direction)
         {
-            return new Projectile(ID, ownerID, position, direction);
+            return new Projectile(ID, ownerID, position, direction, projectileConfig, networkConfig);
         }
 
         public override void OnServerDisconnected() { 
             Log("Lost connection to server.");
             StopNetworking();
+        }
+
+        void SetServerInfo(string serverAddress, int serverPort)
+        {
+            this.serverAddress = serverAddress;
+            this.serverPort = serverPort;
+        }
+
+        public void ConnectToServer(string serverAddress, int serverPort)
+        {
+            SetServerInfo(serverAddress, serverPort);
+            StartNetworkingInternal();
+        }
+
+        protected override T Deserialize<T>(string jsonString) where T : class
+        {
+            return JsonUtility.FromJson<T>(jsonString);
+        }
+
+        protected override string Serialize<T>(T obj)
+        {
+            return JsonUtility.ToJson(obj);
         }
     }
 }

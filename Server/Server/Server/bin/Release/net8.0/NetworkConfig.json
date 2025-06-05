@@ -1,0 +1,5 @@
+{
+  "TickInterval": 0.02,
+  "TickIntervalMS": 20,
+  "PlayerUpdateTickCount": 4
+}
