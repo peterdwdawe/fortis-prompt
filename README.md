@@ -6,8 +6,11 @@
 **Server:**
 - [X] Spawn/Despawn Players on Connect/Disconnect
 - [ ] Projectiles
-  - [ ] Instantiation & registration via rpc
-  - [X] Hit detection: health reduction and notification
+  - [X] Registration/instantiation on request
+  - [X] Hit detection
+    -[X] Player health reduction
+    -[X] Projectile destruction
+  - [ ] Use RPC for above features
 - [X] Update and forward character controls and transform data when received
 - [X] Detect character death, despawn
 - [X] Respawn characters after death
@@ -18,13 +21,14 @@
 - [X] Spawn/Despawn Networked Players on Request
 - [X] Send local controls + position/rotation on tick
 - [X] Update Networked character controls + position/rotation on request
-- [ ] RPC Projectiles
-  - [ ] Send RPC on projectile fire
-  - [X] Instantiate & Simulate projectiles on request
+- [ ] Projectiles
+  - [X] Request projectile creation from server
+  - [X] Instantiation/destruction on request
+  - [ ] Use RPC for above features
         
 **Shared:**
 - [X] Movement + Prediction
-- [X] Projectile Simulation (Not Including Hit detection)
+- [X] Projectile Instantiation, Simulation & Destruction (Not Including Hit detection)
 - [X] Character Spawn/Despawn Logic
 - [ ] Easy-To-Edit Configurations
   - [ ] Player Attributes - Speed, Size, etc.
@@ -55,6 +59,9 @@
 - [ ] Clean up unused functions
 - [ ] Merge common client/server functions
 - [ ] Abstract into interfaces as much as possible, reduce references to concrete classes
-- [ ] Improve config - maybe just create a basic JSON/XML file for all settings?
+- [ ] Improve configs - maybe just create a basic JSON/XML file for all settings? If I have time, an editor window in Unity would be great
 - [ ] Refactor to use composition as much as possible vs inheritence
 - [ ] Sort functions, properties, events, etc. consistently across classes to improve readability
+- [ ] Expand on unit tests
+- [ ] Player collision, if time permits
+- [ ] Bots, if time permits
