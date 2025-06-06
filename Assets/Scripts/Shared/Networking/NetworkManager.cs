@@ -7,7 +7,7 @@ using System.Net.Sockets;
 
 namespace Shared.Networking
 {
-    public abstract class NetworkManager : INetEventListener 
+    public abstract partial class NetworkManager : INetEventListener 
     {
         protected readonly int _port;
         protected NetDataWriter _dataWriter;
@@ -36,26 +36,9 @@ namespace Shared.Networking
 
         IMessageHandler _messageHandler = null;
 
-        public readonly struct NetworkStatistics
-        {
-            public static readonly NetworkStatistics Empty = new NetworkStatistics(0,0,1f);
+        
 
-            public readonly long BytesSent;
-            public readonly long BytesReceived;
-            public readonly float TimeElapsed;
-
-            const float minReportedTimeElapsed = 0.1f;  //avoid divide by zero or huge numbers for first few frames
-
-            public NetworkStatistics(long bytesSent, long bytesReceived, float timeElapsed)
-            {
-                BytesSent = bytesSent;
-                BytesReceived = bytesReceived;
-                TimeElapsed = MathF.Max(timeElapsed, minReportedTimeElapsed);
-            }
-
-            public float AvgBandwidthUp => BytesSent / TimeElapsed;
-            public float AvgBandwidthDown => BytesReceived / TimeElapsed;
-        }
+        NetworkStatistics lastStats = NetworkStatistics.Empty;
 
         public NetworkStatistics GetStatistics()
         {
@@ -64,6 +47,14 @@ namespace Shared.Networking
                 _netManager != null ? _netManager.Statistics.BytesReceived : 0,
                 networkState.CurrentTime
                 );
+        }
+
+        public NetworkStatistics GetDiffStatistics()
+        {
+            var currentStats = GetStatistics();
+            var diff = new NetworkStatistics(lastStats, currentStats);
+            lastStats = currentStats;
+            return diff;
         }
 
         public int GetPeerCount()

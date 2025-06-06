@@ -56,39 +56,6 @@ public class NetworkCanvas : MonoBehaviour
         gameManager.MessageLogged -= LogUI;
     }
 
-    string ToBandwidthString(float bandwidth)
-    {
-        if (bandwidth < 100)
-        {
-            return $"{bandwidth:0.0} B/s";
-        }
-        if (bandwidth < 1000)
-        {
-            return $"{bandwidth:0} B/s";
-        }
-        if (bandwidth < 10000)
-        {
-            return $"{(bandwidth / 1024):0.00} KB/s";
-        }
-        if (bandwidth < 100000)
-        {
-            return $"{(bandwidth / 1024):0.0} KB/s";
-        }
-        if (bandwidth < 1000000)
-        {
-            return $"{(bandwidth / 1024):0} KB/s";
-        }
-
-        return $"{(bandwidth / 1048576):0.00} MB/s";
-    }
-
-    string ToBandwidthString(NetworkManager.NetworkStatistics stats)
-    {
-        return
-            $"<b>Upload:</b> {ToBandwidthString(stats.AvgBandwidthUp)}\n" +
-            $"<b>Download:</b> {ToBandwidthString(stats.AvgBandwidthDown)}";
-    }
-
     // Update is called once per frame
     void Update()
     {
@@ -104,7 +71,7 @@ public class NetworkCanvas : MonoBehaviour
             if (statsUpdateTimer >= statsUpdateInterval)
             {
                 statsUpdateTimer = 0f;
-                statistics.text = ToBandwidthString(gameManager.GetNetworkStatistics());
+                statistics.text = gameManager.GetNetworkDiffStatistics().ToBandwidthString();
             }
         }
     }

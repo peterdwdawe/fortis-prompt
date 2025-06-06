@@ -34,8 +34,11 @@ namespace Shared
         public event Action<Player.Player> PlayerInstantiated;
         public event OnRequestShootHandler ShootRequested;
 
-        public NetworkManager.NetworkStatistics GetNetworkStatistics()
-            => networkManager != null ? networkManager.GetStatistics() : NetworkManager.NetworkStatistics.Empty;
+        public NetworkStatistics GetNetworkTotalStatistics()
+            => networkManager != null ? networkManager.GetStatistics() : NetworkStatistics.Empty;
+
+        public NetworkStatistics GetNetworkDiffStatistics()
+            => networkManager != null ? networkManager.GetDiffStatistics() : NetworkStatistics.Empty;
 
         protected bool StartNetworkingInternal()
         {
@@ -67,7 +70,6 @@ namespace Shared
         }
 
         public event Action<NetworkManager.ConnectionState> StateChanged;
-
 
         public void Tick()
         {
