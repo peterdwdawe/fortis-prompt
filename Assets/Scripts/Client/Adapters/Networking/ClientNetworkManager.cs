@@ -23,7 +23,7 @@ namespace Client.Adapters.Networking
                 return false;
 
             Log($"Attempting connection to {serverAddress} (Port {_port})");
-            _netManager.Connect(serverAddress, _port, networkConfig.testNetworkKey);
+            _netManager.Connect(serverAddress, _port, networkConfig.TestNetworkKey);
             return true;
         }
 

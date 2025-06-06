@@ -73,7 +73,7 @@ namespace Shared.Networking
 
             _dataWriter = new NetDataWriter();
             _netManager = new NetManager(this);
-            _netManager.UpdateTime = networkConfig.TickIntervalMS;
+            _netManager.UpdateTime = networkConfig.TickIntervalMS();
             _netManager.EnableStatistics = true;
 
             _messageHandler = messageHandler;

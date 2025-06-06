@@ -30,7 +30,7 @@ namespace Server
             base.OnConnectionRequest(request);
 
             if (_netManager.ConnectedPeersCount < networkConfig.MaxPlayers)
-                request.AcceptIfKey(networkConfig.testNetworkKey);
+                request.AcceptIfKey(networkConfig.TestNetworkKey);
             else
                 request.Reject();
         }

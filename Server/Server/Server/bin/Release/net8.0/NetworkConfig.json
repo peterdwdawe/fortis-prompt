@@ -1,5 +1,6 @@
 {
   "TickInterval": 0.02,
-  "TickIntervalMS": 20,
-  "PlayerUpdateTickCount": 4
+  "MaxPlayers": 16,
+  "PlayerUpdateTickCount": 4,
+  "testNetworkKey": "fortis_connect_test"
 }

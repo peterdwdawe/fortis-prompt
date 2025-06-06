@@ -56,7 +56,7 @@ namespace Server
                 $"Press any key to stop the server.\n\n");
             try
             {
-                int tickIntervalMS = server.networkConfig.TickIntervalMS;
+                int tickIntervalMS = server.networkConfig.TickIntervalMS();
 
                 Stopwatch tickStopwatch = new Stopwatch();
                 double tickMultiplierMS = 1000.0 / Stopwatch.Frequency;
