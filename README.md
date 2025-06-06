@@ -34,8 +34,7 @@
 ## Next Steps
 - Server Authority: let server decide if movement is valid - i.e. character delta position not too large. Force correction if not
 - Improve interpolation when receiving position updates
-- Improve server ticks: right now the time between ticks on the server is very unreliable.
-  - Currently using Thread.Sleep and 20ms ticks, actual delay is closer to 30 ms.
+- Lag compensation / tick synchronization for players and projectiles
 - Improve configs:
   - Consider storing configs on server, and sending that data to clients when they connect? Right now two copies are stored, one on client side and one on server side. Fine for testing but a nightmare if shipped.
   - A better config editor would be great,  e.g. a ScriptableObject or Unity Editor window that can export to json on build for the server to use 
