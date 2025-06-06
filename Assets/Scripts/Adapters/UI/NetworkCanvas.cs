@@ -32,6 +32,11 @@ public class NetworkCanvas : MonoBehaviour
         currentState = newState;
         status.text = statusPrefix + newState.ToString();
         stateTimer = 0f;
+
+        if(newState == NetworkManager.ConnectionState.Uninitialized)
+        {
+            ShowMainMenu(); //if server disconnects, go back to menu
+        }
     }
 
     NetworkManager.ConnectionState currentState = NetworkManager.ConnectionState.Uninitialized;
