@@ -1,5 +1,59 @@
+# TODO: upload client and server builds!!!
 # Fortis Multiplayer Prompt
-  
+My submission for the given [Multiplayer Programming Prompt](docs/prompt.md).
+
+## Get Started
+# TODO: add release links where needed
+To try out the project, download the latest client and server builds from "Releases", or clone the repo and build from there. 
+You can run the server (Server.exe) with a command line argument if you want to specify which port to use. Otherwise it will default to 5000.
+On the client build, just enter the server address and port you want to connect to, and hit connect. Your local character should be orange, and any networked player characters should be purple.
+### Local Setup
+Running the server and multiple instances of the client all on one machine is the only way I've tested so far, and is straightforward. On the client side, the address defaults to localhost:5000, so it should work out of the box.
+### Configuration
+Configuration [currently leaves a lot to be desired](#issues-and-limitations). To change any setting, you need to change the associated .json file on both the client and server side. The settings are as follows:
+
+**NetworkConfig.json:**
+| Property | Type | Description | Default |
+| --- | --- | --- | --- |
+| **NetworkConfig**.TickInterval | float | Time in seconds between NetworkManager ticks | 0.02 |
+| **NetworkConfig**.MaxPlayers | byte | Max player count, after which the server will reject connections | 16 |
+| **NetworkConfig**.PlayerUpdateTickCount | ushort | A client waits this many ticks between sending control and transform updates | 4 |
+| **NetworkConfig**.TestNetworkKey | string | Must match on client and server to establish connection | "fortis_connect_test" |
+| **PlayerConfig**.MovementSpeed | float | Player speed in m/s | 4.0 |
+| **PlayerConfig**.RotationSpeed | float | Not really a rotation speed per se, each tick Player slerps toward desired rotation using this as "t"| 0.25 |
+| **PlayerConfig**.Radius | float | Player radius in metres, used to calculate projectile hits only | 0.5 |
+| **PlayerConfig**.MaxHP | int | player Max/Spawn HP | 100 |
+| **PlayerConfig**.RespawnTime | float | Respawn time in seconds | 5.0 |
+| **ProjectileConfig**.Damage | int | damage dealth when a player is hit by a projectile | 25 |
+| **ProjectileConfig**.MovementSpeed | float | Projectile speed in m/s | 8.0 |
+| **ProjectileConfig**.Duration | float | Projectile lifetime in seconds, if it doesn't hit anything. | 4.0 |
+
+## Info
+
+### Libraries Used
+**Server (Targets .NET 8.0):**
+  - [System.Text.Json 9.0.5](https://learn.microsoft.com/en-ca/dotnet/api/system.text.json?view=net-8.0) for config file serialization.
+   
+**Client (Unity 2022.3.62f1):**
+ - [Unity Serialization 3.1.2](https://docs.unity3d.com/Packages/com.unity.serialization@3.1) (plus dependencies) for config file serialization, since Unity tends to complain with System.Text.Json.
+ - [Unity UI 1.0.0](https://docs.unity3d.com/Packages/com.unity.ugui@1.0) & [TextMeshPro 3.0.9](https://docs.unity3d.com/Packages/com.unity.textmeshpro@3.0) (plus dependencies) for GUI.
+
+**Both:**
+- [LiteNetLib 1.3.1](https://github.com/RevenantX/LiteNetLib/) for the networking transport layer.
+
+### Issues and Limitations
+- Projectiles are not currently networked via RPC as requested in the prompt - I'm still looking for more guidance on what's expected.
+  - Current behaviour uses existing connection to send a projectile spawn request, and receive a response from the server.
+- I've only tested the server locally, using "localhost" as the network address. I don't see why there would be any problems when deployed to a server, but haven't tested it.
+- Code coverage is very low - currently only testing network message serialization/deserialization.
+- Player-player/player-world/projectile-world collision is not yet implemented.
+- Bots are not yet implemented.
+- Right now, there are two copies of each config file (NetworkConfig.json, PlayerConfig.json, ProjectileConfig.json) - one for the server and one for the client. Any changes must be done in both files or you'll get some weird errors.
+  - This is obviously awful - if there's time, I'd like to keep the config file on the server only, and send that data across whenever a client connects.
+  - If you do run into any issues with desynced config files, just delete them all - They'll regenerate on startup if not found.
+
+## Roadmap
+
 ## To-Do List
 - [ ] Readme/Roadmap
 
