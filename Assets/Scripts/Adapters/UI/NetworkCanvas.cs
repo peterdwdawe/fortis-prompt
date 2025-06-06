@@ -7,7 +7,7 @@ using UnityEngine;
 //TODO: general cleanup
 public class NetworkCanvas : MonoBehaviour
 {
-    [SerializeField] GameInitializer gameManager;
+    [SerializeField] GameManagerComponent gameManager;
 
     [SerializeField] float statsUpdateInterval = 0.5f;
     [SerializeField] float startedStateMaxDuration = 5f;

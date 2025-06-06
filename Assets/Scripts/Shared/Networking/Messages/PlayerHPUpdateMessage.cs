@@ -3,19 +3,19 @@ using LiteNetLib.Utils;
 
 namespace Shared.Networking.Messages
 {
-    public struct HealthUpdateMessage : INetworkMessage<HealthUpdateMessage>
+    public struct PlayerHPUpdateMessage : INetworkMessage<PlayerHPUpdateMessage>
     {
         public MessageType MsgType => MessageType.HealthUpdate;
 
         public int playerID;
         public int hp;
 
-        public HealthUpdateMessage(NetDataReader reader) : this()
+        public PlayerHPUpdateMessage(NetDataReader reader) : this()
         {
             Deserialize(reader);
         }
 
-        public HealthUpdateMessage(int playerID, int hp)
+        public PlayerHPUpdateMessage(int playerID, int hp)
         {
             this.playerID = playerID;
             this.hp = hp;
@@ -40,11 +40,11 @@ namespace Shared.Networking.Messages
             Received?.Invoke(peer, this);
         }
 
-        public bool Equals(HealthUpdateMessage other)
+        public bool Equals(PlayerHPUpdateMessage other)
             => MsgType == other.MsgType
             && playerID == other.playerID
             && hp == other.hp;
 
-        internal static event System.Action<NetPeer, HealthUpdateMessage> Received;
+        internal static event System.Action<NetPeer, PlayerHPUpdateMessage> Received;
     }
 }

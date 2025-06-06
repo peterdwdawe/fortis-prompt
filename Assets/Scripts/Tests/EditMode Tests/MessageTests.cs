@@ -21,9 +21,10 @@ public class MessageTests
         List<INetworkMessage> sentMessages = new List<INetworkMessage>();
 
         var custom = new CustomMessage
-            ("testMessage");
+            (0
+            ,"testMessage");
 
-        var health = new HealthUpdateMessage
+        var health = new PlayerHPUpdateMessage
             (1,
             67);
 

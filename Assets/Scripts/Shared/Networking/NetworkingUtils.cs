@@ -4,7 +4,7 @@ using System.Numerics;
 
 namespace Shared.Networking
 {
-    public static partial class NetworkingUtils
+    public static class NetworkingUtils
     {
         public static bool TryReadNetworkMessage(this NetDataReader reader, out INetworkMessage msg)
         {
@@ -25,7 +25,7 @@ namespace Shared.Networking
                     return true;
 
                 case MessageType.HealthUpdate:
-                    msg = new HealthUpdateMessage(reader);
+                    msg = new PlayerHPUpdateMessage(reader);
                     return true;
 
                 case MessageType.PlayerDeath:

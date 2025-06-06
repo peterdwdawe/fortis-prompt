@@ -16,7 +16,7 @@ public class PlayerUIView : MonoBehaviour
     RectTransform rectTransform;
     RectTransform parentRectTransform;
 
-    internal void Setup(GameObject root, PlayerView player)
+    public void Setup(GameObject root, PlayerView player)
     {
         this.root = root;
         this.player = player;

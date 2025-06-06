@@ -7,6 +7,7 @@ namespace Shared.Networking.Messages
     {
         public MessageType MsgType => MessageType.CustomMessage;
 
+        public int playerID;
         public string msg;
 
         public CustomMessage(NetDataReader reader) : this()
@@ -14,20 +15,23 @@ namespace Shared.Networking.Messages
             Deserialize(reader);
         }
 
-        public CustomMessage(string msg)
+        public CustomMessage(int playerID, string msg)
         {
+            this.playerID = playerID;
             this.msg = msg;
         }
 
         public void Deserialize(NetDataReader reader)
         {
             reader.SkipBytes(1);    // skip msgID byte
+            playerID = reader.GetInt();
             msg = reader.GetString();
         }
 
         public void Serialize(NetDataWriter writer)
         {
             writer.Put((byte)MsgType);
+            writer.Put(playerID);
             writer.Put(msg);
         }
 

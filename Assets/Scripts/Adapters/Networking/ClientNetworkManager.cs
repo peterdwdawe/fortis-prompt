@@ -31,7 +31,7 @@ namespace Adapters.Networking
             Debug.Log("[CLIENT] " + str);
         }
 
-        public bool IsConnected(out NetPeer server)
+        bool IsConnected(out NetPeer server)
         {
             if (!started)
             {

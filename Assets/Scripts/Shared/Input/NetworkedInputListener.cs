@@ -21,11 +21,8 @@ namespace Shared.Input
             OnTransformUpdated?.Invoke(position, rotation);
         }
 
-        public readonly int ID;
-
-        public NetworkedInputListener(int ID)
+        public NetworkedInputListener()
         {
-            this.ID = ID;
         }
     }
 }

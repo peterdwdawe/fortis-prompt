@@ -12,7 +12,7 @@ using UnityEngine;
 
 namespace Adapters
 {
-    public class ClientGameManager : GameManager<ClientGameManager, ClientNetworkManager>
+    public class ClientGameManager : GameManager<ClientNetworkManager>
     {
         private readonly LocalInputListener _localInputListener;
 
@@ -23,10 +23,92 @@ namespace Adapters
             return manager;
         }
 
-        protected override MessageHandler<ClientGameManager, ClientNetworkManager> GenerateMessageHandler()
+        #region Network Message Handling
+
+        protected override IMessageHandler GenerateMessageHandler()
         {
-            return new ClientMessageHandler(this);
+            var handler = new MessageEventHandler();
+
+            handler.PeerDisconnected += OnServerDisconnected;
+            handler.NetworkStopped += Cleanup;
+
+            handler.PlayerRegistered += OnPlayerRegistrationReceived;
+            handler.PlayerHPUpdated += OnPlayerHPUpdateReceived;
+            handler.PlayerSpawned += OnPlayerSpawnReceived;
+            handler.PlayerUpdateReceived += OnPlayerUpdateReceived;
+            handler.PlayerDied += OnPlayerDeathReceived;
+            handler.PlayerDeregistered += OnPlayerDeregistrationReceived;
+
+            handler.ProjectileSpawned += OnProjectileSpawnReceived;
+            handler.ProjectileDespawned += OnProjectileDespawnReceived;
+
+            return handler;
         }
+
+        void OnServerDisconnected(int peerID)
+        {
+            Log("Lost connection to server.");
+            StopNetworking();
+        }
+
+        private void OnPlayerRegistrationReceived(PlayerRegistrationMessage message)
+        {
+            if (message.localPlayer)
+                InstantiateLocalPlayer(message.playerID);
+            else
+                InstantiateNetworkedPlayer(message.playerID);
+        }
+
+        private void OnPlayerHPUpdateReceived(PlayerHPUpdateMessage message)
+        {
+            if (TryGetPlayer(message.playerID, out var player))
+            {
+                player.SetHP(message.hp);
+            }
+        }
+
+        private void OnPlayerSpawnReceived(PlayerSpawnMessage message)
+        {
+            if (!TryGetPlayer(message.playerID, out var player))
+            {
+                Log($"Spawn Player {message.playerID} failed: doesn't exist in lookup!");
+                return;
+            }
+            player.Spawn(message.position, message.rotation);
+        }
+
+        private void OnPlayerDeathReceived(PlayerDeathMessage message)
+        {
+            if (TryGetPlayer(message.playerID, out var player))
+            {
+                //Log($"Kill player {ID}!");
+                player.Kill();
+            }
+            else
+            {
+                Log($"Failed to kill player {message.playerID}: can't find in lookup!");
+            }
+        }
+
+        protected void OnPlayerDeregistrationReceived(PlayerDeregistrationMessage message)
+            => OnPlayerDisconnected(message.playerID);
+
+        private void OnProjectileSpawnReceived(ProjectileSpawnMessage message)
+            => InstantiateProjectile(message.projectileID, message.ownerID, message.position, message.direction);
+
+        private void OnProjectileDespawnReceived(ProjectileDespawnMessage message)
+        {
+            if (TryGetProjectile(message.projectileID, out var projectile))
+            {
+                projectile.Destroy();
+            }
+            else
+            {
+                Log($"Failed to despawn projectile {message.projectileID}: can't find in lookup!");
+            }
+        }
+
+        #endregion
 
         private string serverAddress;
         private int serverPort;
@@ -34,32 +116,18 @@ namespace Adapters
         public ClientGameManager(LocalInputListener localInputListener) : base()
         {
             _localInputListener = localInputListener;
-            PlayerInstantiated += OnPlayerInstantiated;
-            ShootRequested += OnShootRequested;
-            ProjectileInstantiated += OnProjectileInstantiated;
         }
 
-        public void InstantiateLocalPlayer(int ID)
+        private void InstantiateLocalPlayer(int ID)
         {
             InstantiatePlayerInternal(ID, _localInputListener, true);
         }
 
-        private void OnPlayerInstantiated(Player player)
+        protected override void OnPlayerDestroyed(IPlayer player)
         {
-            player.OnUpdateRequested += SendPlayerUpdate;
-
-            var playerViewRoot = Object.Instantiate(Resources.Load<GameObject>("Player"));
-            PlayerView view = playerViewRoot.GetComponentInChildren<PlayerView>();
-            view.Setup(player, playerViewRoot);
-        }
-        public override void DestroyPlayer(int ID)
-        {
-            if (TryGetPlayer(ID, out var player))
-            {
-                player.OnUpdateRequested -= SendPlayerUpdate;
-            }
-
-            base.DestroyPlayer(ID);
+            player.OnUpdateRequested -= SendPlayerUpdate;
+            player.OnShootRequested -= OnShootRequested;
+            base.OnPlayerDestroyed(player);
         }
 
         private void SendPlayerUpdate(IPlayer player)
@@ -72,12 +140,6 @@ namespace Adapters
             networkManager.SendToServer(new RequestProjectileSpawnMessage(playerID, origin, direction));
         }
 
-        private void OnProjectileInstantiated(Projectile projectile)
-        {
-            ProjectileView projectileView = Object.Instantiate(Resources.Load<ProjectileView>("Projectile"));
-            projectileView.Setup(projectile);
-        }
-
         public event System.Action<string> MessageLogged;
 
         protected override void Log(string message)
@@ -88,18 +150,24 @@ namespace Adapters
 
         protected override Player CreateNewPlayer(int ID, IInputListener inputListener, bool local)
         {
-            return new Player(ID, inputListener, local, playerConfig, networkConfig);
+            var player = new Player(ID, inputListener, local, playerConfig, networkConfig);
+
+            player.OnUpdateRequested += SendPlayerUpdate;
+            player.OnShootRequested += OnShootRequested;
+
+            var playerViewRoot = Object.Instantiate(Resources.Load<GameObject>("Player"));
+            PlayerView view = playerViewRoot.GetComponentInChildren<PlayerView>();
+            view.Setup(player, playerViewRoot);
+            return player;
         }
 
-        protected override Projectile CreateNewProjectile(int ID, int ownerID, System.Numerics.Vector3 position, System.Numerics.Vector3 direction)
+        protected override Projectile InstantiateProjectileInternal(int ID, int ownerID, System.Numerics.Vector3 position, System.Numerics.Vector3 direction)
         {
-            return new Projectile(ID, ownerID, position, direction, projectileConfig, networkConfig);
-        }
+            var projectile =  new Projectile(ID, ownerID, position, direction, projectileConfig, networkConfig);
 
-        public override void OnServerDisconnected()
-        {
-            Log("Lost connection to server.");
-            StopNetworking();
+            ProjectileView projectileView = Object.Instantiate(Resources.Load<ProjectileView>("Projectile"));
+            projectileView.Setup(projectile);
+            return projectile;
         }
 
         void SetServerInfo(string serverAddress, int serverPort)

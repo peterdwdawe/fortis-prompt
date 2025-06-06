@@ -7,24 +7,24 @@ using System.Net.Sockets;
 
 namespace Shared.Networking
 {
-    public abstract partial class NetworkManager : INetEventListener 
+    public abstract class NetworkManager : INetEventListener 
     {
         protected readonly int _port;
         protected NetDataWriter _dataWriter;
         protected NetManager _netManager;
         protected NetworkConfig networkConfig;
 
-        public float CurrentTime => CurrentTick * networkConfig.TickInterval;
-        public uint CurrentTick { get; private set; } = 0;
+        float CurrentTime => CurrentTick * networkConfig.TickInterval;
+        uint CurrentTick = 0;
 
-        public void SetCurrentTick(uint currentTick)
+        void SetCurrentTick(uint currentTick)
         {
             CurrentTick = currentTick;
         }
 
         public bool started { get; private set; } = false;
 
-        public NetworkManager(NetworkConfig networkConfig, int port)
+        protected NetworkManager(NetworkConfig networkConfig, int port)
         {
             this.networkConfig = networkConfig;
             _port = port;
@@ -64,9 +64,6 @@ namespace Shared.Networking
             lastStats = currentStats;
             return diff;
         }
-
-        public int GetPeerCount()
-            => _netManager != null ? _netManager.ConnectedPeersCount : 0;
 
         public bool Start(IMessageHandler messageHandler)
         {
@@ -138,13 +135,13 @@ namespace Shared.Networking
             Log($"ConnectionRequest Received!");
         }
 
-        public virtual void OnPeerConnected(NetPeer peer)
+        public void OnPeerConnected(NetPeer peer)
         {
             Log($"Connected to {peer.Id} ({peer})");
             OnConnected?.Invoke(peer);
         }
 
-        public virtual void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber, DeliveryMethod deliveryMethod)
+        public void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber, DeliveryMethod deliveryMethod)
         {
             if (reader.TryReadNetworkMessage(out var msg))
             {
@@ -159,7 +156,7 @@ namespace Shared.Networking
                 reader.Recycle();
         }
 
-        public virtual void OnPeerDisconnected(NetPeer peer, DisconnectInfo disconnectInfo)
+        public void OnPeerDisconnected(NetPeer peer, DisconnectInfo disconnectInfo)
         {
             string peerName = peer != null ? $"{peer.Id} ({peer})" : "Null connection";
 
@@ -167,17 +164,17 @@ namespace Shared.Networking
             OnDisconnected?.Invoke(peer);
         }
 
-        public virtual void OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader, UnconnectedMessageType messageType)
+        public void OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader, UnconnectedMessageType messageType)
         {
             Log($"OnNetworkReceiveUnconnected!");
         }
 
-        public virtual void OnNetworkLatencyUpdate(NetPeer peer, int latency)
+        public void OnNetworkLatencyUpdate(NetPeer peer, int latency)
         {
             //Log($"OnNetworkLatencyUpdate!");
         }
 
-        public virtual void OnNetworkError(IPEndPoint endPoint, SocketError socketErrorCode)
+        public void OnNetworkError(IPEndPoint endPoint, SocketError socketErrorCode)
         {
             Log($"Error: {socketErrorCode}");
         }
@@ -190,7 +187,7 @@ namespace Shared.Networking
             Connected
         }
 
-        public ConnectionState currentConnectionState { get; private set; } = ConnectionState.Uninitialized;
+        ConnectionState currentConnectionState = ConnectionState.Uninitialized;
 
         public ConnectionState CheckConnectionState(out bool stateChanged)
         {

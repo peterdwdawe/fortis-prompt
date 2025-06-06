@@ -5,34 +5,37 @@ using System.Numerics;
 using Shared.Configuration;
 using Shared.Input;
 using Shared.Networking;
+using Shared.Networking.Messages;
 using Shared.Player;
 using Shared.Projectiles;
 
 namespace Shared
 {
-    //TODO: try to get rid of all these generic type constraints in favor of interfaces
-    public abstract class GameManager<TGameManager,TNetworkManager>
-        where TGameManager : GameManager<TGameManager, TNetworkManager>
-        where TNetworkManager : NetworkManager
+    public abstract class GameManager<TNetworkManager> where TNetworkManager : NetworkManager
     {
+        protected GameManager()
+        {
+            networkConfig = LoadConfig<NetworkConfig>(networkConfigPath);
+            playerConfig = LoadConfig<PlayerConfig>(playerConfigPath);
+            projectileConfig = LoadConfig<ProjectileConfig>(projectileConfigPath);
+
+            playerLookup = new Dictionary<int, IPlayer>(networkConfig.MaxPlayers);
+            projectileLookup = new Dictionary<int, IProjectile>(networkConfig.MaxPlayers * 16);
+            networkedInputListenerLookup = new Dictionary<int, NetworkedInputListener>(networkConfig.MaxPlayers);
+            messageHandler = GenerateMessageHandler();
+        }
+
+        protected readonly IMessageHandler messageHandler;
+
         protected const string networkConfigPath = "NetworkConfig.json";
         protected const string playerConfigPath = "PlayerConfig.json";
         protected const string projectileConfigPath = "ProjectileConfig.json";
 
         protected abstract TNetworkManager GenerateNetworkManager();
-        protected abstract MessageHandler<TGameManager, TNetworkManager> GenerateMessageHandler();
-        public TNetworkManager networkManager { get; private set; } = null;
+        protected abstract IMessageHandler GenerateMessageHandler();
+        protected TNetworkManager networkManager { get; private set; } = null;
 
         protected abstract void Log(string message);
-
-        private void RequestShoot(int playerID, Vector3 origin, Vector3 direction)
-        {
-            ShootRequested?.Invoke(playerID, origin, direction);
-        }
-
-        public event Action<Projectile> ProjectileInstantiated;
-        public event Action<Player.Player> PlayerInstantiated;
-        public event OnRequestShootHandler ShootRequested;
 
         public NetworkStatistics GetNetworkTotalStatistics()
             => networkManager != null ? networkManager.GetStatistics() : NetworkStatistics.Empty;
@@ -45,7 +48,6 @@ namespace Shared
             StopNetworking();
 
             networkManager = GenerateNetworkManager();
-            var messageHandler = GenerateMessageHandler();
             if (!networkManager.Start(messageHandler))
             {
                 Log("Failed to start networking!");
@@ -100,7 +102,7 @@ namespace Shared
                 projectile.Tick();
                 if (projectile.Expired)
                 {
-                    DestroyProjectile(projectile.ID);
+                    projectile.Destroy();
                 }
             }
         }
@@ -114,19 +116,8 @@ namespace Shared
         Dictionary<int, NetworkedInputListener> networkedInputListenerLookup;
 
         public readonly NetworkConfig networkConfig;
-        public readonly PlayerConfig playerConfig;
-        public readonly ProjectileConfig projectileConfig;
-
-        public GameManager()
-        {
-            networkConfig = LoadConfig<NetworkConfig>(networkConfigPath);
-            playerConfig = LoadConfig<PlayerConfig>(playerConfigPath);
-            projectileConfig = LoadConfig<ProjectileConfig>(projectileConfigPath);
-
-            playerLookup = new Dictionary<int, IPlayer>(networkConfig.MaxPlayers);
-            projectileLookup = new Dictionary<int, IProjectile>(networkConfig.MaxPlayers * 16);
-            networkedInputListenerLookup = new Dictionary<int, NetworkedInputListener>(networkConfig.MaxPlayers);
-        }
+        protected readonly PlayerConfig playerConfig;
+        protected readonly ProjectileConfig projectileConfig;
 
         protected bool TryGetPlayer(int ID, out IPlayer player)
             => playerLookup.TryGetValue(ID, out player) && player != null;
@@ -143,9 +134,9 @@ namespace Shared
         protected bool TryGetNetworkedInputListener(int ID, out NetworkedInputListener listener)
              => networkedInputListenerLookup.TryGetValue(ID, out listener) && listener != null;
 
-        public void InstantiateNetworkedPlayer(int ID)
+        protected void InstantiateNetworkedPlayer(int ID)
         {
-            var listener = new NetworkedInputListener(ID);
+            var listener = new NetworkedInputListener();
 
             if (networkedInputListenerLookup.ContainsKey(ID))
             {
@@ -162,7 +153,6 @@ namespace Shared
         protected Player.Player InstantiatePlayerInternal(int ID, IInputListener inputListener, bool local)
         {
             var player = CreateNewPlayer(ID, inputListener, local);
-            player.OnShootRequested += RequestShoot;
 
             if (playerLookup.ContainsKey(ID))
             {
@@ -173,86 +163,43 @@ namespace Shared
             playerLookup[ID] = player;
 
             Log($"Player {ID} Created");
-            PlayerInstantiated?.Invoke(player);
+            player.Destroyed += OnPlayerDestroyed;
 
             return player;
         }
-        public virtual void DestroyPlayer(int ID)
+
+        protected virtual void OnPlayerDestroyed(IPlayer player)
         {
 
-            if (playerLookup.TryGetValue(ID, out var player))
-            {
-                player.OnShootRequested -= RequestShoot;
-                Log($"Player {ID} Removed");
-                player.Destroy();
-            }
-            else
-            {
-                Log($"DestroyPlayer Error: player ID {ID} does not exist in lookup! ignoring...");
-            }
+            Log($"Player {player.ID} Destroyed");
+            player.Destroyed -= OnPlayerDestroyed;
 
-            networkedInputListenerLookup.Remove(ID);
-            playerLookup.Remove(ID);
-        }
-        public void SpawnPlayer(int ID, Vector3 position, Quaternion rotation)
-        {
-            if (!TryGetPlayer(ID, out var player))
-            {
-                Log($"Spawn Player {ID} failed: doesn't exist in lookup!");
-                return;
-            }
-            player.Spawn(position, rotation);
-        }
-        public void KillPlayer(int ID)
-        {
-            if (TryGetPlayer(ID, out var player))
-            {
-                //Log($"Kill player {ID}!");
-                player.Kill();
-            }
-            else
-            {
-                Log($"Failed to kill player {ID}: can't find in lookup!");
-            }
-        }
-        public void SetPlayerHP(int ID, int HP)
-        {
-            if (TryGetPlayer(ID, out var player))
-            {
-                player.SetHP(HP);
-            }
+            networkedInputListenerLookup.Remove(player.ID);
+            playerLookup.Remove(player.ID);
         }
 
-        protected abstract Projectile CreateNewProjectile(int ID, int ownerID, Vector3 position, Vector3 direction);
+        protected abstract Projectile InstantiateProjectileInternal(int ID, int ownerID, Vector3 position, Vector3 direction);
 
-        protected void InstantiateProjectileInternal(int ID, int ownerID, Vector3 position, Vector3 direction)
+        protected void InstantiateProjectile(int ID, int ownerID, Vector3 position, Vector3 direction)
         {
-            Projectile projectile = CreateNewProjectile(ID, ownerID, position, direction);
+            Projectile projectile = InstantiateProjectileInternal(ID, ownerID, position, direction);
 
             if (projectileLookup.ContainsKey(ID))
             {
                 Log($"InstantiateProjectile Error: projectile ID {ID} already exists! overwriting...");
                 //TODO();//cleanup previous? this shouldn't be happening anyway
             }
+            projectile.Destroyed += OnProjectileDestroyed;
 
             projectileLookup[ID] = projectile;
-
-            //Log($"Projectile {ID} Created");
-            ProjectileInstantiated?.Invoke(projectile);
         }
 
-        public void InstantiateProjectile(int ID, int ownerID, Vector3 position, Vector3 direction)
-            => InstantiateProjectileInternal(ID, ownerID, position, direction);
-
-        public virtual void DestroyProjectile(int ID)
+        protected virtual void OnProjectileDestroyed(IProjectile projectile)
         {
-            if (TryGetProjectile(ID, out var projectile))
-            {
-                projectile.Destroy();
-            }
-            projectileLookup.Remove(ID);
+            projectile.Destroyed -= OnProjectileDestroyed;
+            projectileLookup.Remove(projectile.ID);
         }
-        public virtual void ApplyNetworkedMovement(int playerID, Vector2 input, Vector3 position, Quaternion rotation)
+        protected virtual void ApplyNetworkedMovement(int playerID, Vector2 input, Vector3 position, Quaternion rotation)
         {
             if (TryGetNetworkedInputListener(playerID, out var listener))
             {
@@ -260,10 +207,15 @@ namespace Shared
             }
         }
 
+        protected virtual void OnPlayerUpdateReceived(PlayerUpdateMessage message)
+        {
+            ApplyNetworkedMovement(message.playerID, message.input, message.position, message.rotation);
+        }
+
         static List<IProjectile> projectileCleanupList = new List<IProjectile>();
         static List<IPlayer> playerCleanupList = new List<IPlayer>();
 
-        public void Cleanup()
+        protected virtual void Cleanup()
         {
             projectileCleanupList.Clear();
             projectileCleanupList.AddRange(AllProjectiles);
@@ -273,15 +225,25 @@ namespace Shared
 
             foreach (var projectile in projectileCleanupList)
             {
-                DestroyProjectile(projectile.ID);
+                projectile.Destroy();
             }
             foreach (var player in playerCleanupList)
             {
-                DestroyPlayer(player.ID);
+                player.Destroy();
             }
         }
 
-        public virtual void OnServerDisconnected() { }
+        protected void OnPlayerDisconnected(int playerID)
+        {
+            if (TryGetPlayer(playerID, out var player))
+            {
+                player.Destroy();
+            }
+            else
+            {
+                Log($"DestroyPlayer Error: player ID {playerID} does not exist in lookup! ignoring...");
+            }
+        }
 
         protected T LoadConfig<T>(string path) where T : class, new()
         {
