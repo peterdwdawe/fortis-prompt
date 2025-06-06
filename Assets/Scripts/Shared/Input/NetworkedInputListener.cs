@@ -11,7 +11,7 @@ namespace Shared.Input
         public event Action<Vector3, Quaternion> OnTransformUpdated;
 
         //TODO: Currently never called by design. maybe revisit and improve
-        public event Action OnShootLocal;
+        public event Action OnShootRequested;
 
         public Vector2 Movement { get; private set; }
 

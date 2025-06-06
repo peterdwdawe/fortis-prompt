@@ -42,7 +42,7 @@ namespace Shared.Player
             ID = id;
 
             _inputListener = inputListener;
-            _inputListener.OnShootLocal += RequestShootNetworked;
+            _inputListener.OnShootRequested += RequestShootNetworked;
             _inputListener.OnTransformUpdated += UpdateTransform;
 
             this.playerConfig = playerConfig;
@@ -127,7 +127,7 @@ namespace Shared.Player
 
         public void Dispose()
         {
-            _inputListener.OnShootLocal -= RequestShootNetworked;
+            _inputListener.OnShootRequested -= RequestShootNetworked;
             _inputListener.OnTransformUpdated -= UpdateTransform;
         }
 
