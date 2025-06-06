@@ -1,16 +1,15 @@
-using Adapters.Character;
-using Adapters.Input;
-using Adapters.Networking;
-using Adapters.Projectiles;
+using Client.Adapters.Character;
+using Client.Input;
+using Client.Adapters.Networking;
+using Client.Adapters.Projectiles;
 using Shared;
 using Shared.Input;
-using Shared.Networking;
 using Shared.Networking.Messages;
 using Shared.Player;
 using Shared.Projectiles;
 using UnityEngine;
 
-namespace Adapters
+namespace Client
 {
     public class ClientGameManager : GameManager<ClientNetworkManager>
     {

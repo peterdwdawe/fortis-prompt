@@ -1,7 +1,7 @@
 using Shared.Projectiles;
 using UnityEngine;
 
-namespace Adapters.Projectiles
+namespace Client.Adapters.Projectiles
 {
     public class ProjectileView : MonoBehaviour
     {

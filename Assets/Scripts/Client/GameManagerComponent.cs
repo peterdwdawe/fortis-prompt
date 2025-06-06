@@ -1,9 +1,9 @@
-using Adapters.Input;
+using Client.Input;
 using Shared.Networking;
 using System;
 using UnityEngine;
 
-namespace Adapters
+namespace Client
 {
     public class GameManagerComponent : MonoBehaviour
     {

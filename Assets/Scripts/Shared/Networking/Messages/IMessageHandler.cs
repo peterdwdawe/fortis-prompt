@@ -1,6 +1,6 @@
 ﻿using LiteNetLib;
 
-namespace Shared.Networking
+namespace Shared.Networking.Messages
 {
     public interface IMessageHandler
     {

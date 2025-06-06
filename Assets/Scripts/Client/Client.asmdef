@@ -1,9 +1,10 @@
 {
-    "name": "Adapters",
+    "name": "Client",
     "rootNamespace": "",
     "references": [
         "GUID:9d12953d290ed43218520fde6f01f004",
-        "GUID:998e3b2e36d9c9a4f94f46b4a84b19ab"
+        "GUID:998e3b2e36d9c9a4f94f46b4a84b19ab",
+        "GUID:6055be8ebefd69e48b49212b09b47b2f"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

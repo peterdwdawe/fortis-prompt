@@ -1,9 +1,10 @@
 ﻿using LiteNetLib;
 using Shared.Configuration;
 using Shared.Networking;
+using Shared.Networking.Messages;
 using UnityEngine;
 
-namespace Adapters.Networking
+namespace Client.Adapters.Networking
 {
     public class ClientNetworkManager : NetworkManager
     {

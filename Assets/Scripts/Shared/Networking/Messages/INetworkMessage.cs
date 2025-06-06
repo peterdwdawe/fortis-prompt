@@ -1,7 +1,7 @@
 ﻿using LiteNetLib;
 using LiteNetLib.Utils;
 
-namespace Shared.Networking
+namespace Shared.Networking.Messages
 {
     public enum MessageType : byte
     {

@@ -40,30 +40,30 @@ namespace Shared.Networking
         {
             if (bandwidth < 10)
             {
-                return $"{bandwidth:0.00}  B/s";
+                return $"  {bandwidth:0.00} B/s";
             }
             if (bandwidth < 100)
             {
-                return $"{bandwidth:00.0}  B/s";
+                return $" {bandwidth:00.00} B/s";
             }
             if (bandwidth < 1000)
             {
-                return $" {bandwidth:000}  B/s";
+                return $"{bandwidth:000.00} B/s";
             }
             if (bandwidth < 10000)
             {
-                return $"{(bandwidth / 1000):0.00} KB/s";
+                return $"  {(bandwidth / 1000):0.0} KB/s";
             }
             if (bandwidth < 100000)
             {
-                return $"{(bandwidth / 1000):00.0} KB/s";
+                return $" {(bandwidth / 1000):00.0} KB/s";
             }
             if (bandwidth < 1000000)
             {
-                return $" {(bandwidth / 1000):000} KB/s";
+                return $"{(bandwidth / 1000):000.0} KB/s";
             }
 
-            return $"{(bandwidth / 1000000):0.00} MB/s";
+            return $"{(bandwidth / 1000000):000.0} MB/s";
         }
     }
 }

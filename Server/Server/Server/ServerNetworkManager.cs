@@ -1,18 +1,14 @@
 using LiteNetLib;
-using LiteNetLib.Utils;
 using Shared.Configuration;
 using Shared.Networking;
+using Shared.Networking.Messages;
 using System;
-using System.Net;
 
 namespace Server
 {
     public class ServerNetworkManager : NetworkManager
     {
-        public ServerNetworkManager(NetworkConfig networkConfig, int port) : base(networkConfig, port)
-        {
-
-        }
+        public ServerNetworkManager(NetworkConfig networkConfig, int port) : base(networkConfig, port){ }
 
         protected override bool StartInternal()
         {

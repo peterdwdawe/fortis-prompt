@@ -62,10 +62,10 @@ public class MessageTests
             new System.Numerics.Vector3(9.4f, 8.5f, -1.6f),
             new System.Numerics.Vector3(9.4f, 5.6f, -7f));
 
-        TestSerialization(writer, reader, v2, NetworkingUtils.GetVector2, NetworkingUtils.Put);
-        TestSerialization(writer, reader, v3, NetworkingUtils.GetVector3, NetworkingUtils.Put);
-        TestSerialization(writer, reader, v4, NetworkingUtils.GetVector4, NetworkingUtils.Put);
-        TestSerialization(writer, reader, q, NetworkingUtils.GetQuaternion, NetworkingUtils.Put);
+        TestSerialization(writer, reader, v2, NetworkingExtensions.GetVector2, NetworkingExtensions.Put);
+        TestSerialization(writer, reader, v3, NetworkingExtensions.GetVector3, NetworkingExtensions.Put);
+        TestSerialization(writer, reader, v4, NetworkingExtensions.GetVector4, NetworkingExtensions.Put);
+        TestSerialization(writer, reader, q, NetworkingExtensions.GetQuaternion, NetworkingExtensions.Put);
 
 
         TestSerialization(writer, reader, custom);

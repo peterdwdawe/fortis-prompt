@@ -1,8 +1,7 @@
 ﻿using LiteNetLib;
-using Shared.Networking.Messages;
 using System;
 
-namespace Shared.Networking
+namespace Shared.Networking.Messages
 {
     public class MessageEventHandler : IMessageHandler
     {

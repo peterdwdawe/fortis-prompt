@@ -1,6 +1,7 @@
 ﻿using LiteNetLib;
 using LiteNetLib.Utils;
 using Shared.Configuration;
+using Shared.Networking.Messages;
 using System;
 using System.Net;
 using System.Net.Sockets;

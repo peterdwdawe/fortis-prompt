@@ -2,7 +2,7 @@ using Shared.Player;
 using System;
 using UnityEngine;
 
-namespace Adapters.Character
+namespace Client.Adapters.Character
 {
     public class PlayerView : MonoBehaviour
     {

@@ -2,7 +2,7 @@ using Shared.Input;
 using System;
 using UnityEngine;
 
-namespace Adapters.Input
+namespace Client.Input
 {
     public class LocalInputListener : MonoBehaviour, IInputListener
     {

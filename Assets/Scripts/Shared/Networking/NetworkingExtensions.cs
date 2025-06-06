@@ -4,7 +4,7 @@ using System.Numerics;
 
 namespace Shared.Networking
 {
-    public static class NetworkingUtils
+    public static class NetworkingExtensions
     {
         public static bool TryReadNetworkMessage(this NetDataReader reader, out INetworkMessage msg)
         {
@@ -39,15 +39,19 @@ namespace Shared.Networking
                 case MessageType.CustomMessage:
                     msg = new CustomMessage(reader);
                     return true;
+
                 case MessageType.PlayerRegistration:
                     msg = new PlayerRegistrationMessage(reader);
                     return true;
+
                 case MessageType.PlayerDeregistration:
                     msg = new PlayerDeregistrationMessage(reader);
                     return true;
+
                 case MessageType.RequestProjectileSpawn:
                     msg = new RequestProjectileSpawnMessage(reader);
                     return true;
+
                 default:
                     msg = default;
                     return false;

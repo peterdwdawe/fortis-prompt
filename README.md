@@ -1,34 +1,26 @@
 # Fortis Multiplayer Prompt
   
 ## To-Do List
-- Readme Roadmap
+- Readme/Roadmap
   - [ ] Complete
 
-- Code Quality
-  - [X] Clean up unused functions
-  - [ ] Search TODO's for anything I forgot to return to
-  - [ ] Merge common client/server functions
-  - [ ] Abstract into interfaces as much as possible, reduce references to concrete classes
-    - References that should probably be fixed:
-      - Client/Server GameManagers
-      - Client/Server NetworkManagers
-      - Client/Server MessageHandlers
-  - [ ] Refactor to use composition as much as possible vs inheritence
-    - Classes that should probably be fixed:
-      - ServerPlayer
-      - ServerProjectile
-      - LocalInputListener
-  - [ ] Review folder structure (including config save locations) and mirror it in namespaces
-  - [ ] Sort functions, properties, events, etc. consistently across classes to improve readability
-  - [ ] Add/Improve Comments
+**Code Quality**
+- [X] Clean up unused functions
+- [X] Search TODO's for anything I forgot to return to
+- [X] Merge common client/server functions
+- [X] Abstract into interfaces as much as possible, reduce references to concrete classes
+- [X] Refactor to use composition as much as possible vs inheritence
+- [X] Review folder structure (including config save locations) and mirror it in namespaces
+- [ ] Sort functions, properties, events, etc. consistently across project to improve readability
+- [ ] Add/Improve Comments
 
-- Features
-  - [ ] Expand on unit tests
-  - [ ] Player collision, if time permits
-  - [ ] Bots, if time permits
-  - [ ] Improve configs 
-    - [ ] If I have time, an editor window in Unity would be great
-    - [ ] Maybe store configs on server side only, and send them over to client when connecting to ensure sync?
+**Features**
+- [ ] Expand on unit tests
+- [ ] Player collision, if time permits
+- [ ] Bots, if time permits
+- [ ] Improve configs 
+  - [ ] If I have time, an editor window in Unity would be great
+  - [ ] Maybe store configs on server side only, and send them over to client when connecting to ensure sync?
 
 
 ## Next Steps
