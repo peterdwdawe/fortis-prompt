@@ -9,7 +9,7 @@ namespace Adapters.Networking
     {
         private readonly string serverAddress;
 
-        public ClientNetworkManager(NetworkState networkState, int serverPort, string serverAddress) : base(networkState, serverPort)
+        public ClientNetworkManager(NetworkConfig networkConfig, int serverPort, string serverAddress) : base(networkConfig, serverPort)
         {
             this.serverAddress = serverAddress;
         }
@@ -22,7 +22,7 @@ namespace Adapters.Networking
                 return false;
 
             Log($"Attempting connection to {serverAddress} (Port {_port})");
-            _netManager.Connect(serverAddress, _port, networkState.config.testNetworkKey);
+            _netManager.Connect(serverAddress, _port, networkConfig.testNetworkKey);
             return true;
         }
 

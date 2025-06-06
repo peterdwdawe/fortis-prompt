@@ -78,11 +78,9 @@ namespace Shared
 
             //Log("Tick!");
 
-            networkState.Tick();
+            networkManager.Tick();
 
-            networkManager.PollEvents();
-
-            if (networkManager == null) //PollEvents can make us close connection - we need to check here again to make sure we're still in-game.
+            if (networkManager == null) //networkManager.Tick() can make us close connection - we need to check here again to make sure we're still in-game.
                 return;
 
             var connectionState = networkManager.CheckConnectionState(out bool stateChanged);
@@ -118,15 +116,12 @@ namespace Shared
         public readonly NetworkConfig networkConfig;
         public readonly PlayerConfig playerConfig;
         public readonly ProjectileConfig projectileConfig;
-        public readonly NetworkState networkState;
 
         public GameManager()
         {
             networkConfig = LoadConfig<NetworkConfig>(networkConfigPath);
             playerConfig = LoadConfig<PlayerConfig>(playerConfigPath);
             projectileConfig = LoadConfig<ProjectileConfig>(projectileConfigPath);
-
-            networkState = new NetworkState(networkConfig);
 
             playerLookup = new Dictionary<int, IPlayer>(networkConfig.MaxPlayers);
             projectileLookup = new Dictionary<int, IProjectile>(networkConfig.MaxPlayers * 16);

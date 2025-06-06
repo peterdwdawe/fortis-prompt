@@ -21,7 +21,7 @@ namespace Server
 
         protected override ServerNetworkManager GenerateNetworkManager()
         {
-            return new ServerNetworkManager(networkState, serverPort);
+            return new ServerNetworkManager(networkConfig, serverPort);
         }
 
         protected override void Log(string message)

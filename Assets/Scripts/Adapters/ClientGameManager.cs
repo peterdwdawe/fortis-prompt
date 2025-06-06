@@ -18,7 +18,7 @@ namespace Adapters
 
         protected override ClientNetworkManager GenerateNetworkManager()
         {
-            var manager = new ClientNetworkManager(networkState, serverPort, serverAddress);
+            var manager = new ClientNetworkManager(networkConfig, serverPort, serverAddress);
 
             return manager;
         }

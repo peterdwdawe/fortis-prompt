@@ -12,25 +12,33 @@ namespace Shared.Networking
         protected readonly int _port;
         protected NetDataWriter _dataWriter;
         protected NetManager _netManager;
-        protected NetworkState networkState;
+        protected NetworkConfig networkConfig;
+
+        public float CurrentTime => CurrentTick * networkConfig.TickInterval;
+        public uint CurrentTick { get; private set; } = 0;
+
+        public void SetCurrentTick(uint currentTick)
+        {
+            CurrentTick = currentTick;
+        }
 
         public bool started { get; private set; } = false;
 
-        public NetworkManager(NetworkState networkState, int port)
+        public NetworkManager(NetworkConfig networkConfig, int port)
         {
-            this.networkState = networkState;
+            this.networkConfig = networkConfig;
             _port = port;
         }
 
         public bool IsConnected()
             => started && _netManager.ConnectedPeersCount > 0;
 
-        public void PollEvents()
+        public void Tick()
         {
             if (!started)
                 return;
 
-            //Log("Poll Events!");
+            CurrentTick++;
             _netManager.PollEvents();
         }
 
@@ -45,7 +53,7 @@ namespace Shared.Networking
             return new NetworkStatistics(
                 _netManager != null ? _netManager.Statistics.BytesSent : 0,
                 _netManager != null ? _netManager.Statistics.BytesReceived : 0,
-                networkState.CurrentTime
+                CurrentTime
                 );
         }
 
@@ -67,7 +75,7 @@ namespace Shared.Networking
 
             _dataWriter = new NetDataWriter();
             _netManager = new NetManager(this);
-            _netManager.UpdateTime = networkState.config.TickIntervalMS;
+            _netManager.UpdateTime = networkConfig.TickIntervalMS;
             _netManager.EnableStatistics = true;
 
             _messageHandler = messageHandler;
@@ -94,7 +102,7 @@ namespace Shared.Networking
                 return false;
             }
             started = true;
-            networkState.SetCurrentTick(0);
+            SetCurrentTick(0);
             return true;
         }
 
@@ -120,7 +128,7 @@ namespace Shared.Networking
                 _netManager.Stop();
 
                 started = false;
-                networkState.SetCurrentTick(0);
+                SetCurrentTick(0);
             }
         }
         protected abstract void Log(string str);

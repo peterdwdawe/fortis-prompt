@@ -9,7 +9,7 @@ namespace Server
 {
     public class ServerNetworkManager : NetworkManager
     {
-        public ServerNetworkManager(NetworkState networkState, int port) : base(networkState, port)
+        public ServerNetworkManager(NetworkConfig networkConfig, int port) : base(networkConfig, port)
         {
 
         }
@@ -33,8 +33,8 @@ namespace Server
         {
             base.OnConnectionRequest(request);
 
-            if (_netManager.ConnectedPeersCount < networkState.config.MaxPlayers)
-                request.AcceptIfKey(networkState.config.testNetworkKey);
+            if (_netManager.ConnectedPeersCount < networkConfig.MaxPlayers)
+                request.AcceptIfKey(networkConfig.testNetworkKey);
             else
                 request.Reject();
         }
