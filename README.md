@@ -1,8 +1,7 @@
 # Fortis Multiplayer Prompt
   
 ## To-Do List
-- Readme/Roadmap
-  - [ ] Complete
+- [ ] Readme/Roadmap
 
 **Code Quality**
 - [X] Clean up unused functions
@@ -32,7 +31,7 @@
   - A better config editor would be great,  e.g. a ScriptableObject or Unity Editor window that can export to json on build for the server to use 
 - Other Ideas?
 
-## Checklist
+## Prompt Checklist
 ### Required:
 
 **Server:**
