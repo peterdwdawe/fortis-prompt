@@ -12,6 +12,9 @@ namespace Client.Adapters.Projectiles
             _projectile = player;
             _projectile.Destroyed += (_) => Destroy(gameObject);
             enabled = true;
+            transform.position = _projectile.Position.ToUnityVector();
+            transform.rotation = Quaternion.LookRotation(_projectile.Direction.ToUnityVector());
+
         }
 
         private void Update()

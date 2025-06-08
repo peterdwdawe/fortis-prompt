@@ -3,9 +3,9 @@ using LiteNetLib.Utils;
 
 namespace Shared.Networking.Messages
 {
-    public struct CustomMessage : INetworkMessage<CustomMessage>
+    public struct CustomMessage : IStandardNetworkMessage<CustomMessage>
     {
-        public MessageType MsgType => MessageType.CustomMessage;
+        public StandardMessageType MsgType => StandardMessageType.CustomMessage;
 
         public int playerID;
         public string msg;
@@ -35,15 +35,8 @@ namespace Shared.Networking.Messages
             writer.Put(msg);
         }
 
-        public void Receive(NetPeer peer)
-        {
-            Received?.Invoke(peer, this);
-        }
-
         public bool Equals(CustomMessage other)
             => MsgType == other.MsgType
             && msg == other.msg;
-
-        internal static event System.Action<NetPeer, CustomMessage> Received;
     }
 }

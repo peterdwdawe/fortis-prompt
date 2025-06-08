@@ -4,53 +4,46 @@ using System.Numerics;
 
 namespace Shared.Networking.Messages
 {
-    public struct RequestProjectileSpawnMessage : INetworkMessage<RequestProjectileSpawnMessage>
-    {
-        public MessageType MsgType => MessageType.RequestProjectileSpawn;
+    //public struct RequestProjectileSpawnMessage : IStandardNetworkMessage<RequestProjectileSpawnMessage>
+    //{
+    //    public MessageType MsgType => MessageType.RequestProjectileSpawn;
 
-        public int ownerID;
-        public Vector3 position;
-        public Vector3 direction;
+    //    public int ownerID;
+    //    public Vector3 position;
+    //    public Vector3 direction;
 
-        public RequestProjectileSpawnMessage(NetDataReader reader) : this()
-        {
-            Deserialize(reader);
-        }
+    //    public RequestProjectileSpawnMessage(NetDataReader reader) : this()
+    //    {
+    //        Deserialize(reader);
+    //    }
 
-        public RequestProjectileSpawnMessage(int ownerID, Vector3 position, Vector3 direction)
-        {
-            this.ownerID = ownerID;
-            this.position = position;
-            this.direction = direction;
-        }
+    //    public RequestProjectileSpawnMessage(int ownerID, Vector3 position, Vector3 direction)
+    //    {
+    //        this.ownerID = ownerID;
+    //        this.position = position;
+    //        this.direction = direction;
+    //    }
 
-        public void Deserialize(NetDataReader reader)
-        {
-            reader.SkipBytes(1);    // skip msgID byte
-            ownerID = reader.GetInt();
-            position = reader.GetVector3();
-            direction = reader.GetVector3();
-        }
+    //    public void Deserialize(NetDataReader reader)
+    //    {
+    //        reader.SkipBytes(1);    // skip msgID byte
+    //        ownerID = reader.GetInt();
+    //        position = reader.GetVector3();
+    //        direction = reader.GetVector3();
+    //    }
 
-        public void Serialize(NetDataWriter writer)
-        {
-            writer.Put((byte)MsgType);
-            writer.Put(ownerID);
-            writer.Put(position);
-            writer.Put(direction);
-        }
+    //    public void Serialize(NetDataWriter writer)
+    //    {
+    //        writer.Put((byte)MsgType);
+    //        writer.Put(ownerID);
+    //        writer.Put(position);
+    //        writer.Put(direction);
+    //    }
 
-        public void Receive(NetPeer peer)
-        {
-            Received?.Invoke(peer, this);
-        }
-
-        public bool Equals(RequestProjectileSpawnMessage other)
-            => MsgType == other.MsgType
-            && ownerID == other.ownerID
-            && position == other.position
-            && direction == other.direction;
-
-        internal static event System.Action<NetPeer, RequestProjectileSpawnMessage> Received;
-    }
+    //    public bool Equals(RequestProjectileSpawnMessage other)
+    //        => MsgType == other.MsgType
+    //        && ownerID == other.ownerID
+    //        && position == other.position
+    //        && direction == other.direction;
+    //}
 }

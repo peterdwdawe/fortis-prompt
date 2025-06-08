@@ -4,9 +4,9 @@ using System.Numerics;
 
 namespace Shared.Networking.Messages
 {
-    public struct ProjectileSpawnMessage : INetworkMessage<ProjectileSpawnMessage>
+    public struct ProjectileSpawnMessage : IStandardNetworkMessage<ProjectileSpawnMessage>
     {
-        public MessageType MsgType => MessageType.ProjectileSpawn;
+        public StandardMessageType MsgType => StandardMessageType.ProjectileSpawn;
 
         public int projectileID;
         public int ownerID;
@@ -44,18 +44,11 @@ namespace Shared.Networking.Messages
             writer.Put(direction);
         }
 
-        public void Receive(NetPeer peer)
-        {
-            Received?.Invoke(peer, this);
-        }
-
         public bool Equals(ProjectileSpawnMessage other)
             => MsgType == other.MsgType
             && projectileID == other.projectileID
             && ownerID == other.ownerID
             && position == other.position
             && direction == other.direction;
-
-        internal static event System.Action<NetPeer, ProjectileSpawnMessage> Received;
     }
 }

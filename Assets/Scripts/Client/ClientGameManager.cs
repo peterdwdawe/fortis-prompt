@@ -8,41 +8,57 @@ using Shared.Networking.Messages;
 using Shared.Player;
 using Shared.Projectiles;
 using UnityEngine;
+using Shared.Networking;
+using Shared.Networking.RPC;
+using Client.Adapters.Player;
 
 namespace Client
 {
-    public class ClientGameManager : GameManager<ClientNetworkManager>
+    public class ClientGameManager : GameManager<INetworkClient>
     {
         private readonly LocalInputListener _localInputListener;
 
-        protected override ClientNetworkManager GenerateNetworkManager()
+        protected override INetworkClient GenerateNetworkManager()
         {
-            var manager = new ClientNetworkManager(networkConfig, serverPort, serverAddress);
+            var manager = new ClientNetworkManager(networkConfig);
+
+            manager.PeerDisconnected += OnServerDisconnected;
+            manager.NetworkStopped += Cleanup;
+
+            manager.PlayerRegistered += OnPlayerRegistrationReceived;
+            manager.PlayerHPUpdated += OnPlayerHPUpdateReceived;
+            manager.PlayerSpawned += OnPlayerSpawnReceived;
+            manager.PlayerUpdateReceived += OnPlayerUpdateReceived;
+            manager.PlayerDied += OnPlayerDeathReceived;
+            manager.PlayerDeregistered += OnPlayerDeregistrationReceived;
+
+            manager.ProjectileSpawned += OnProjectileSpawnReceived;
+            manager.ProjectileDespawned += OnProjectileDespawnReceived;
 
             return manager;
         }
 
         #region Network Message Handling
 
-        protected override IMessageHandler GenerateMessageHandler()
-        {
-            var handler = new MessageEventHandler();
+        //protected override IMessageHandler GenerateMessageHandler()
+        //{
+        //    var handler = new MessageEventHandler();
 
-            handler.PeerDisconnected += OnServerDisconnected;
-            handler.NetworkStopped += Cleanup;
+        //    handler.PeerDisconnected += OnServerDisconnected;
+        //    handler.NetworkStopped += Cleanup;
 
-            handler.PlayerRegistered += OnPlayerRegistrationReceived;
-            handler.PlayerHPUpdated += OnPlayerHPUpdateReceived;
-            handler.PlayerSpawned += OnPlayerSpawnReceived;
-            handler.PlayerUpdateReceived += OnPlayerUpdateReceived;
-            handler.PlayerDied += OnPlayerDeathReceived;
-            handler.PlayerDeregistered += OnPlayerDeregistrationReceived;
+        //    handler.PlayerRegistered += OnPlayerRegistrationReceived;
+        //    handler.PlayerHPUpdated += OnPlayerHPUpdateReceived;
+        //    handler.PlayerSpawned += OnPlayerSpawnReceived;
+        //    handler.PlayerUpdateReceived += OnPlayerUpdateReceived;
+        //    handler.PlayerDied += OnPlayerDeathReceived;
+        //    handler.PlayerDeregistered += OnPlayerDeregistrationReceived;
 
-            handler.ProjectileSpawned += OnProjectileSpawnReceived;
-            handler.ProjectileDespawned += OnProjectileDespawnReceived;
+        //    handler.ProjectileSpawned += OnProjectileSpawnReceived;
+        //    handler.ProjectileDespawned += OnProjectileDespawnReceived;
 
-            return handler;
-        }
+        //    return handler;
+        //}
 
         void OnServerDisconnected(int peerID)
         {
@@ -92,8 +108,8 @@ namespace Client
         protected void OnPlayerDeregistrationReceived(PlayerDeregistrationMessage message)
             => OnPlayerDisconnected(message.playerID);
 
-        private void OnProjectileSpawnReceived(ProjectileSpawnMessage message)
-            => InstantiateProjectile(message.projectileID, message.ownerID, message.position, message.direction);
+        //private void OnProjectileSpawnReceived(ProjectileSpawnMessage message)
+        //    => InstantiateProjectile(message.projectileID, message.ownerID, message.position, message.direction);
 
         private void OnProjectileDespawnReceived(ProjectileDespawnMessage message)
         {
@@ -109,8 +125,8 @@ namespace Client
 
         #endregion
 
-        private string serverAddress;
-        private int serverPort;
+        //private string serverAddress;
+        //private int serverPort;
 
         public ClientGameManager(LocalInputListener localInputListener) : base()
         {
@@ -124,19 +140,13 @@ namespace Client
 
         protected override void OnPlayerDestroyed(IPlayer player)
         {
-            player.OnUpdateRequested -= SendPlayerUpdate;
-            player.OnShootRequested -= OnShootRequested;
+            player.UpdateRequested -= SendPlayerUpdate;
             base.OnPlayerDestroyed(player);
         }
 
         private void SendPlayerUpdate(IPlayer player)
         {
-            networkManager.SendToServer(new PlayerUpdateMessage(player.ID, player.LastInput, player.Position, player.Rotation));
-        }
-
-        private void OnShootRequested(int playerID, System.Numerics.Vector3 origin, System.Numerics.Vector3 direction)
-        {
-            networkManager.SendToServer(new RequestProjectileSpawnMessage(playerID, origin, direction));
+            networkManager.Send(new PlayerUpdateMessage(player.ID, player.LastInput, player.Position, player.Rotation));
         }
 
         public event System.Action<string> MessageLogged;
@@ -149,10 +159,9 @@ namespace Client
 
         protected override Player CreateNewPlayer(int ID, IInputListener inputListener, bool local)
         {
-            var player = new Player(ID, inputListener, local, playerConfig, networkConfig);
+            var player = new ClientPlayer(ID, inputListener, local, playerConfig, networkConfig, projectileConfig, networkManager);
 
-            player.OnUpdateRequested += SendPlayerUpdate;
-            player.OnShootRequested += OnShootRequested;
+            player.UpdateRequested += SendPlayerUpdate;
 
             var playerViewRoot = Object.Instantiate(Resources.Load<GameObject>("Player"));
             PlayerView view = playerViewRoot.GetComponentInChildren<PlayerView>();
@@ -160,35 +169,29 @@ namespace Client
             return player;
         }
 
-        protected override Projectile InstantiateProjectileInternal(int ID, int ownerID, System.Numerics.Vector3 position, System.Numerics.Vector3 direction)
-        {
-            var projectile =  new Projectile(ID, ownerID, position, direction, projectileConfig, networkConfig);
+        //protected override IProjectile InstantiateProjectileInternal(int ID, int ownerID, System.Numerics.Vector3 position, System.Numerics.Vector3 direction)
+        //{
+        //    var projectile =  new Projectile(ID, ownerID, position, direction, projectileConfig, networkConfig);
 
-            ProjectileView projectileView = Object.Instantiate(Resources.Load<ProjectileView>("Projectile"));
-            projectileView.Setup(projectile);
-            return projectile;
-        }
-
-        void SetServerInfo(string serverAddress, int serverPort)
-        {
-            this.serverAddress = serverAddress;
-            this.serverPort = serverPort;
-        }
+        //    ProjectileView projectileView = Object.Instantiate(Resources.Load<ProjectileView>("Projectile"));
+        //    projectileView.Setup(projectile);
+        //    return projectile;
+        //}
 
         public void ConnectToServer(string serverAddress, int serverPort)
         {
-            SetServerInfo(serverAddress, serverPort);
-            StartNetworkingInternal();
+            if(TryStartNetworkingInternal(0))
+                networkManager.ConnectToServer(serverAddress, serverPort);
         }
 
-        protected override T Deserialize<T>(string jsonString) where T : class
-        {
-            return JsonUtility.FromJson<T>(jsonString);
-        }
+        //protected override T Deserialize<T>(string jsonString) where T : class
+        //{
+        //    return JsonUtility.FromJson<T>(jsonString);
+        //}
 
-        protected override string Serialize<T>(T obj)
-        {
-            return JsonUtility.ToJson(obj);
-        }
+        //protected override string Serialize<T>(T obj)
+        //{
+        //    return JsonUtility.ToJson(obj);
+        //}
     }
 }

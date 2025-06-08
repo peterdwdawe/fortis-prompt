@@ -3,9 +3,9 @@ using LiteNetLib.Utils;
 
 namespace Shared.Networking.Messages
 {
-    public struct PlayerHPUpdateMessage : INetworkMessage<PlayerHPUpdateMessage>
+    public struct PlayerHPUpdateMessage : IStandardNetworkMessage<PlayerHPUpdateMessage>
     {
-        public MessageType MsgType => MessageType.HealthUpdate;
+        public StandardMessageType MsgType => StandardMessageType.PlayerHPUpdate;
 
         public int playerID;
         public int hp;
@@ -35,16 +35,9 @@ namespace Shared.Networking.Messages
             writer.Put(hp);
         }
 
-        public void Receive(NetPeer peer)
-        {
-            Received?.Invoke(peer, this);
-        }
-
         public bool Equals(PlayerHPUpdateMessage other)
             => MsgType == other.MsgType
             && playerID == other.playerID
             && hp == other.hp;
-
-        internal static event System.Action<NetPeer, PlayerHPUpdateMessage> Received;
     }
 }

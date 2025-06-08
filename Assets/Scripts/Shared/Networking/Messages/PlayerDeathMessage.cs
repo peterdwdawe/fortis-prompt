@@ -3,9 +3,9 @@ using LiteNetLib.Utils;
 
 namespace Shared.Networking.Messages
 {
-    public struct PlayerDeathMessage : INetworkMessage<PlayerDeathMessage>
+    public struct PlayerDeathMessage : IStandardNetworkMessage<PlayerDeathMessage>
     {
-        public MessageType MsgType => MessageType.PlayerDeath;
+        public StandardMessageType MsgType => StandardMessageType.PlayerDeath;
 
         public int playerID;
 
@@ -31,15 +31,8 @@ namespace Shared.Networking.Messages
             writer.Put(playerID);
         }
 
-        public void Receive(NetPeer peer)
-        {
-            Received?.Invoke(peer, this);
-        }
-
         public bool Equals(PlayerDeathMessage other)
             => MsgType == other.MsgType
             && playerID == other.playerID;
-
-        internal static event System.Action<NetPeer, PlayerDeathMessage> Received;
     }
 }

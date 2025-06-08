@@ -56,6 +56,7 @@ namespace Server
                 $"Press any key to stop the server.\n\n");
             try
             {
+                float tickInterval = server.networkConfig.TickInterval;
                 int tickIntervalMS = server.networkConfig.TickIntervalMS();
 
                 Stopwatch tickStopwatch = new Stopwatch();
@@ -71,7 +72,7 @@ namespace Server
                 string networkStats = string.Empty;
                 while (!Console.KeyAvailable)
                 {
-                    server.Tick();
+                    server.Update(tickInterval);
 
                     //Thread.Sleep isn't very accurate... we can do better!
                     //Thread.Sleep(server.networkConfig.TickIntervalMS);

@@ -62,6 +62,7 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\Client\Adapters\Projectiles\ProjectileView.cs" />
     <Compile Include="Assets\Scripts\Client\Adapters\UI\PlayerUIView.cs" />
+    <Compile Include="Assets\Scripts\Client\Adapters\Player\ClientPlayer.cs" />
     <Compile Include="Assets\Scripts\Client\GameManagerComponent.cs" />
     <Compile Include="Assets\Scripts\Client\Adapters\UI\LogGroup.cs" />
     <Compile Include="Assets\Scripts\Client\Adapters\NumericsExtensions.cs" />

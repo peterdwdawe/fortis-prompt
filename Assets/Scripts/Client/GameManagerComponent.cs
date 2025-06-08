@@ -40,9 +40,9 @@ namespace Client
             StateChanged?.Invoke(obj);
         }
 
-        private void FixedUpdate()
+        private void Update()
         {
-            _manager.Tick();
+            _manager.Update(Time.deltaTime);
         }
 
         public void StartClient(string address, int port)

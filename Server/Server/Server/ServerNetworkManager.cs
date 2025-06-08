@@ -2,104 +2,37 @@ using LiteNetLib;
 using Shared.Configuration;
 using Shared.Networking;
 using Shared.Networking.Messages;
+using Shared.Networking.RPC;
 using System;
 
 namespace Server
 {
-    public class ServerNetworkManager : NetworkManager
+    public class ServerNetworkManager : NetworkManager, INetworkServer
     {
-        public ServerNetworkManager(NetworkConfig networkConfig, int port) : base(networkConfig, port){ }
-
-        protected override bool StartInternal()
+        public ServerNetworkManager(NetworkConfig networkConfig) : base(networkConfig)
         {
-            if (!_netManager.Start(_port))
-                return false;
-
-            _netManager.BroadcastReceiveEnabled = true;
-
-            return true;
         }
+        public void SendToAll(IStandardNetworkMessage message)
+            => SendToAll(message, ChannelType.Standard);
 
-        protected override void Log(string str)
-        {
-            Console.WriteLine("[SERVER] " + str);
-        }
+        public void SendToAllExcept(int playerID, IStandardNetworkMessage message)
+            => SendToAllExcept(playerID, message, ChannelType.Standard);
 
-        public override void OnConnectionRequest(ConnectionRequest request)
-        {
-            base.OnConnectionRequest(request);
+        public void SendToAllExcept(NetPeer peer, IStandardNetworkMessage message)
+            => SendToAllExcept(peer, message, ChannelType.Standard);
 
-            if (_netManager.ConnectedPeersCount < networkConfig.MaxPlayers)
-                request.AcceptIfKey(networkConfig.TestNetworkKey);
-            else
-                request.Reject();
-        }
+        public void SendTo(int playerID, IStandardNetworkMessage message)
+            => SendTo(playerID, message, ChannelType.Standard);
 
-        #region Server Send Functions
+        public void SendTo(NetPeer peer, IStandardNetworkMessage message)
+            => SendTo(peer, message, ChannelType.Standard);
 
-        public void SendToAll(INetworkMessage message)
-        {
-            if (!IsConnected())
-            {
-                //Log($"{message.GetType()} SendToAll failed: not connected!");
-                return;
-            }
+        public TResponse SendRpcRequestTo<TResponse>(int playerID, IRpcRequestMessage<TResponse> message)
+            where TResponse : IRpcResponseMessage
+            => SendRpcRequest(playerID, message);
 
-            _dataWriter.Reset();
-            _dataWriter.Put(message);
-            _netManager.SendToAll(_dataWriter, DeliveryMethod.ReliableOrdered);
-        }
-
-        public void SendToAllExcept(int playerID, INetworkMessage message)
-        {
-            if (!IsConnected())
-            {
-                //Log($"{message.GetType()} SendToAllExecpt {playerID} failed: not connected!");
-                return;
-            }
-
-            _dataWriter.Reset();
-            _dataWriter.Put(message);
-            foreach (var _peer in _netManager.ConnectedPeerList)
-            {
-                if (_peer.Id == playerID) continue;
-                _peer.Send(_dataWriter, DeliveryMethod.ReliableOrdered);
-            }
-        }
-
-        public void SendToAllExcept(NetPeer peer, INetworkMessage message)
-            => SendToAllExcept(peer.Id, message);
-
-        public void SendTo(int playerID, INetworkMessage message)
-        {
-            if (!IsConnected())
-            {
-                //Log($"{message.GetType()} SendTo {playerID} failed: not connected!");
-                return;
-            }
-
-            var peer = _netManager.GetPeerById(playerID);
-
-            if (peer == null)
-            {
-                Log($"{message.GetType()} SendTo {playerID} failed: can't find peer!");
-                return;
-            }
-            SendTo(peer, message);
-        }
-
-        public void SendTo(NetPeer peer, INetworkMessage message)
-        {
-            if (!IsConnected())
-            {
-                //Log($"{message.GetType()} SendTo {peer.Id} failed: not connected!");
-                return;
-            }
-
-            _dataWriter.Reset();
-            _dataWriter.Put(message);
-            peer.Send(_dataWriter, DeliveryMethod.ReliableOrdered);
-        }
-        #endregion
+        public TResponse SendRpcRequestTo<TResponse>(NetPeer peer, IRpcRequestMessage<TResponse> message) 
+            where TResponse : IRpcResponseMessage
+            => SendRpcRequest(peer, message);
     }
 }

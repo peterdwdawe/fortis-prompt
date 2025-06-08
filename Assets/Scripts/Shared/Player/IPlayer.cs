@@ -1,3 +1,4 @@
+using Shared.Projectiles;
 using System;
 using System.Numerics;
 
@@ -5,13 +6,13 @@ namespace Shared.Player
 {
     public interface IPlayer : IDisposable
     {
-        event OnRequestShootHandler OnShootRequested;
+        event OnShootHandler ShotProjectile;
         event Action<IPlayer> HPSet;
         event Action<IPlayer> Spawned;
         event Action<IPlayer> Died;
         event Action<IPlayer> Destroyed;
         event Action<IPlayer> RespawnRequested;
-        event Action<IPlayer> OnUpdateRequested;
+        event Action<IPlayer> UpdateRequested;
         event Action<IPlayer> HPReduced;
 
         Vector3 Position { get; }
@@ -25,10 +26,11 @@ namespace Shared.Player
 
         void SetHP(int HP);
 
-        void Tick();
+        void Update(float deltaTime);
 
         void Spawn(Vector3 position, Quaternion rotation);
         void Kill();
         void Destroy();
+        IProjectile Shoot(int projectileID, Vector3 position, Vector3 direction);
     }
 }

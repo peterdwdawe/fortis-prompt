@@ -8,50 +8,55 @@ using Shared.Networking;
 using Shared.Networking.Messages;
 using Shared.Player;
 using Shared.Projectiles;
+using System.Text.Json;
 
 namespace Shared
 {
-    public abstract class GameManager<TNetworkManager> where TNetworkManager : NetworkManager
+    public abstract class GameManager<TNetworkManager> where TNetworkManager : INetworkManager
     {
         protected GameManager()
         {
-            networkConfig = LoadConfig<NetworkConfig>(networkConfigPath);
-            playerConfig = LoadConfig<PlayerConfig>(playerConfigPath);
-            projectileConfig = LoadConfig<ProjectileConfig>(projectileConfigPath);
+            //networkConfig = LoadConfig<NetworkConfig>(networkConfigPath);
+            //playerConfig = LoadConfig<PlayerConfig>(playerConfigPath);
+            //projectileConfig = LoadConfig<ProjectileConfig>(projectileConfigPath);
+            networkConfig = new NetworkConfig(LoadConfig<NetworkConfigData>(networkConfigPath));
+            playerConfig = new PlayerConfig(LoadConfig<PlayerConfigData>(playerConfigPath));
+            projectileConfig = new ProjectileConfig(LoadConfig<ProjectileConfigData>(projectileConfigPath));
 
             playerLookup = new Dictionary<int, IPlayer>(networkConfig.MaxPlayers);
             projectileLookup = new Dictionary<int, IProjectile>(networkConfig.MaxPlayers * 16);
             networkedInputListenerLookup = new Dictionary<int, NetworkedInputListener>(networkConfig.MaxPlayers);
-            messageHandler = GenerateMessageHandler();
+
+            networkManager = GenerateNetworkManager();
+            networkManager.MessageLogged += Log;
+            //messageHandler = GenerateMessageHandler();
         }
 
-        protected readonly IMessageHandler messageHandler;
+        //protected readonly IMessageHandler messageHandler;
 
         protected const string networkConfigPath = "NetworkConfig.json";
         protected const string playerConfigPath = "PlayerConfig.json";
         protected const string projectileConfigPath = "ProjectileConfig.json";
 
         protected abstract TNetworkManager GenerateNetworkManager();
-        protected abstract IMessageHandler GenerateMessageHandler();
-        protected TNetworkManager networkManager { get; private set; } = null;
+        //protected abstract IMessageHandler GenerateMessageHandler();
+        protected readonly TNetworkManager networkManager;
 
         protected abstract void Log(string message);
 
         public NetworkStatistics GetNetworkTotalStatistics()
-            => networkManager != null ? networkManager.GetStatistics() : NetworkStatistics.Empty;
+            => networkManager.started ? networkManager.GetTotalStatistics() : NetworkStatistics.Empty;
 
         public NetworkStatistics GetNetworkDiffStatistics()
-            => networkManager != null ? networkManager.GetDiffStatistics() : NetworkStatistics.Empty;
+            => networkManager.started ? networkManager.GetDiffStatistics() : NetworkStatistics.Empty;
 
-        protected bool StartNetworkingInternal()
+        protected bool TryStartNetworkingInternal(int port)
         {
             StopNetworking();
 
-            networkManager = GenerateNetworkManager();
-            if (!networkManager.Start(messageHandler))
+            if (!networkManager.TryStartNetworking(port))
             {
                 Log("Failed to start networking!");
-                networkManager = null;
                 return false;
             }
             //Log("Started networking!");
@@ -60,30 +65,29 @@ namespace Shared
 
         public void StopNetworking()
         {
-            if (networkManager == null)
+            if (!networkManager.started)
             {
                 return;
             }
 
             networkManager.Stop();
-            networkManager = null;
             StateChanged?.Invoke(NetworkManager.ConnectionState.Uninitialized);
             //Log("Stopped networking!");
         }
 
         public event Action<NetworkManager.ConnectionState> StateChanged;
 
-        public void Tick()
+        public void Update(float deltaTime)
         {
-            if (networkManager == null)
+            if (!networkManager.started)
                 return;
 
             //Log("Tick!");
 
-            networkManager.Tick();
+            networkManager.Update(deltaTime);
 
-            if (networkManager == null) //networkManager.Tick() can make us close connection - we need to check here again to make sure we're still in-game.
-                return;
+            //if (networkManager == null) //networkManager.Tick() can make us close connection - we need to check here again to make sure we're still in-game.
+            //    return;
 
             var connectionState = networkManager.CheckConnectionState(out bool stateChanged);
             if (stateChanged)
@@ -94,12 +98,12 @@ namespace Shared
 
             foreach (var player in playerLookup.Values)
             {
-                player.Tick();
+                player.Update(deltaTime);
             }
 
             foreach (var projectile in projectileLookup.Values)
             {
-                projectile.Tick();
+                projectile.Update(deltaTime);
                 if (projectile.Expired)
                 {
                     projectile.Destroy();
@@ -164,6 +168,7 @@ namespace Shared
 
             Log($"Player {ID} Created");
             player.Destroyed += OnPlayerDestroyed;
+            player.ShotProjectile += OnPlayerShot;
 
             return player;
         }
@@ -173,25 +178,49 @@ namespace Shared
 
             Log($"Player {player.ID} Destroyed");
             player.Destroyed -= OnPlayerDestroyed;
+            player.ShotProjectile -= OnPlayerShot;
 
             networkedInputListenerLookup.Remove(player.ID);
             playerLookup.Remove(player.ID);
         }
 
-        protected abstract Projectile InstantiateProjectileInternal(int ID, int ownerID, Vector3 position, Vector3 direction);
+        //protected abstract IProjectile InstantiateProjectileInternal(int ID, int ownerID, Vector3 position, Vector3 direction);
 
-        protected void InstantiateProjectile(int ID, int ownerID, Vector3 position, Vector3 direction)
+        protected virtual void OnPlayerShot(IPlayer player, IProjectile projectile)
         {
-            Projectile projectile = InstantiateProjectileInternal(ID, ownerID, position, direction);
-
-            if (projectileLookup.ContainsKey(ID))
+            if (ProjectileExists(projectile.ID))
             {
-                Log($"InstantiateProjectile Error: projectile ID {ID} already exists! overwriting...");
+                Log($"InstantiateProjectile Error: projectile ID {projectile.ID} already exists! overwriting...");
                 //TODO();//cleanup previous? this shouldn't be happening anyway
             }
+
             projectile.Destroyed += OnProjectileDestroyed;
 
-            projectileLookup[ID] = projectile;
+            projectileLookup[projectile.ID] = projectile;
+        }
+
+        //protected void InstantiateProjectile(int ID, int ownerID, Vector3 position, Vector3 direction)
+        //{
+        //    TODO();// delete
+
+        //    IProjectile projectile = InstantiateProjectileInternal(ID, ownerID, position, direction);
+
+        //    //if (projectileLookup.ContainsKey(ID))
+        //    //{
+        //    //    Log($"InstantiateProjectile Error: projectile ID {ID} already exists! overwriting...");
+        //    //    //TODO();//cleanup previous? this shouldn't be happening anyway
+        //    //}
+        //    //projectile.Destroyed += OnProjectileDestroyed;
+
+        //    //projectileLookup[ID] = projectile;
+        //}
+
+        protected virtual void OnProjectileSpawnReceived(ProjectileSpawnMessage message)
+        {
+            if (TryGetPlayer(message.ownerID, out var player))
+            {
+                player.Shoot(message.projectileID,message.position,message.direction);
+            }
         }
 
         protected virtual void OnProjectileDestroyed(IProjectile projectile)
@@ -238,6 +267,19 @@ namespace Shared
             if (TryGetPlayer(playerID, out var player))
             {
                 player.Destroy();
+
+                projectileCleanupList.Clear();
+                foreach (var projectile in AllProjectiles)
+                {
+                    if(projectile.ownerID == playerID)
+                    {
+                        projectileCleanupList.Add(projectile);
+                    }
+                }
+                foreach (var projectile in projectileCleanupList)
+                {
+                    projectile.Destroy();
+                }
             }
             else
             {
@@ -267,7 +309,15 @@ namespace Shared
             return config;
         }
 
-        protected abstract T Deserialize<T>(string jsonString) where T : class;
-        protected abstract string Serialize<T>(T obj) where T : new();
+
+        protected T Deserialize<T>(string jsonString) where T : class
+        {
+            return JsonSerializer.Deserialize<T>(jsonString);
+        }
+
+        protected string Serialize<T>(T obj)
+        {
+            return JsonSerializer.Serialize(obj, new JsonSerializerOptions { WriteIndented = true });
+        }
     }
 }

@@ -30,12 +30,12 @@ namespace Shared.Projectiles
             this.networkConfig = networkConfig;
         }
 
-        public virtual void Tick()
+        public virtual void Update(float deltaTime)
         {
             if(Expired) 
                 return;
 
-            Position += _direction * (projectileConfig.MovementSpeed * networkConfig.TickInterval);
+            Position += _direction * (projectileConfig.MovementSpeed * deltaTime);
 
             Moved?.Invoke(this);
         }

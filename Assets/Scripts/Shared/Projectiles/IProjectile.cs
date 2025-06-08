@@ -14,7 +14,7 @@ namespace Shared.Projectiles
         int ownerID { get; }
         Vector3 Direction { get; }
 
-        void Tick();
+        void Update(float deltaTime);
         void Destroy();
     }
 }

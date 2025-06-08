@@ -4,9 +4,9 @@ using System.Numerics;
 
 namespace Shared.Networking.Messages
 {
-    public struct PlayerSpawnMessage : INetworkMessage<PlayerSpawnMessage>
+    public struct PlayerSpawnMessage : IStandardNetworkMessage<PlayerSpawnMessage>
     {
-        public MessageType MsgType => MessageType.PlayerSpawn;
+        public StandardMessageType MsgType => StandardMessageType.PlayerSpawn;
 
         public int playerID;
         public Vector3 position;
@@ -40,17 +40,10 @@ namespace Shared.Networking.Messages
             writer.Put(rotation);
         }
 
-        public void Receive(NetPeer peer)
-        {
-            Received?.Invoke(peer, this);
-        }
-
         public bool Equals(PlayerSpawnMessage other)
             => MsgType == other.MsgType
             && playerID == other.playerID
             && position == other.position
             && rotation == other.rotation;
-
-        internal static event System.Action<NetPeer, PlayerSpawnMessage> Received;
     }
 }

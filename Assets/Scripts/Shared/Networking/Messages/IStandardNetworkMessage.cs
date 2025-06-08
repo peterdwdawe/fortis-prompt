@@ -3,7 +3,7 @@ using LiteNetLib.Utils;
 
 namespace Shared.Networking.Messages
 {
-    public enum MessageType : byte
+    public enum StandardMessageType : byte
     {
         CustomMessage = 0,
         PlayerRegistration,
@@ -12,20 +12,18 @@ namespace Shared.Networking.Messages
         RequestProjectileSpawn,
         ProjectileSpawn,
         ProjectileDespawn,
-        HealthUpdate,
+        PlayerHPUpdate,
         PlayerDeath,
         PlayerSpawn
     }
 
-    public interface INetworkMessage : INetSerializable
+    public interface IStandardNetworkMessage : INetSerializable
     {
-        MessageType MsgType { get; }
-
-        void Receive(NetPeer peer);
+        StandardMessageType MsgType { get; }
     }
 
-    public interface INetworkMessage<TMessage> : INetworkMessage, System.IEquatable<TMessage>
-        where TMessage : struct, INetworkMessage<TMessage>
+    public interface IStandardNetworkMessage<TMessage> : IStandardNetworkMessage, System.IEquatable<TMessage>
+        where TMessage : struct, IStandardNetworkMessage<TMessage>
     {
     
     }

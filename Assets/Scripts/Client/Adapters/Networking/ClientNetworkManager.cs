@@ -1,57 +1,37 @@
 ﻿using LiteNetLib;
+using LiteNetLib.Utils;
 using Shared.Configuration;
 using Shared.Networking;
 using Shared.Networking.Messages;
+using Shared.Networking.RPC;
+using System;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Client.Adapters.Networking
 {
-    public class ClientNetworkManager : NetworkManager
+    public class ClientNetworkManager : NetworkManager, INetworkClient
     {
-        private readonly string serverAddress;
-
-        public ClientNetworkManager(NetworkConfig networkConfig, int serverPort, string serverAddress) : base(networkConfig, serverPort)
+        public ClientNetworkManager(NetworkConfig networkConfig) : base(networkConfig)
         {
-            this.serverAddress = serverAddress;
         }
 
-        protected override bool StartInternal()
+
+        public void ConnectToServer(string serverAddress, int serverPort)
         {
-            _netManager.UnconnectedMessagesEnabled = true;
-
-            if (!_netManager.Start())
-                return false;
-
-            Log($"Attempting connection to {serverAddress} (Port {_port})");
-            _netManager.Connect(serverAddress, _port, networkConfig.TestNetworkKey);
-            return true;
+            Log($"Connecting to {serverAddress} (Port {serverPort})");
+            _netManager.Connect(serverAddress, serverPort, _networkConfig.TestNetworkKey);
         }
 
-        protected override void Log(string str)
+        public void Send(IStandardNetworkMessage message)
+            => Send(message, ChannelType.Standard);
+
+        public TResponse SendRpcRequest<TResponse>(IRpcRequestMessage<TResponse> message)
+            where TResponse : IRpcResponseMessage
         {
-            Debug.Log("[CLIENT] " + str);
-        }
-
-        bool IsConnected(out NetPeer server)
-        {
-            if (!started)
-            {
-                server = default;
-                return false;
-            }
-
-            server = _netManager.FirstPeer;
-            return server != null && server.ConnectionState == LiteNetLib.ConnectionState.Connected;
-        }
-
-        public void SendToServer(INetworkMessage message)
-        {
-            if (!IsConnected(out var server))
-                return;
-
-            _dataWriter.Reset();
-            _dataWriter.Put(message);
-            server.Send(_dataWriter, DeliveryMethod.ReliableOrdered);
+            //Log($"Send {message.MsgType} RPC Request!");
+            Send(message, ChannelType.RpcRequest);
+            return WaitForRpcResponse<TResponse>();
         }
     }
 }

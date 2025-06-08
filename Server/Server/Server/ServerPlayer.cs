@@ -1,6 +1,9 @@
 ﻿using Shared.Configuration;
 using Shared.Input;
 using Shared.Player;
+using Shared.Projectiles;
+using System;
+using System.Numerics;
 
 namespace Server
 {
@@ -9,27 +12,46 @@ namespace Server
         private int deadTick = 0;
         private readonly int respawnWaitTicks;
 
-        public ServerPlayer(int id, IInputListener inputListener, bool localPlayer, PlayerConfig playerConfig, NetworkConfig networkConfig)
-            : base(id, inputListener, localPlayer, playerConfig, networkConfig)
+        public ServerPlayer(int id, IInputListener inputListener, bool localPlayer, PlayerConfig playerConfig, NetworkConfig networkConfig, ProjectileConfig projectileConfig)
+            : base(id, inputListener, localPlayer, playerConfig, networkConfig, projectileConfig)
         {
             respawnWaitTicks = (int)(playerConfig.RespawnTime / networkConfig.TickInterval);
         }
 
-        protected override void TickAlive()
+        protected override void UpdateAlive(float deltaTime)
         {
-            base.TickAlive();
+            base.UpdateAlive(deltaTime);
             deadTick = 0;
         }
 
-        protected override void TickDead()
+        protected override void UpdateDead(float deltaTime)
         {
-            base.TickDead();
+            base.UpdateDead(deltaTime);
             deadTick++;
 
             if (deadTick >= respawnWaitTicks)
             {
                 RequestRespawn();
             }
+
+            //TODO();// just do this in gameManager?
+        }
+
+        protected override void ShootLocal()
+        {
+            Console.WriteLine("Error: ShootLocal called on server!");
+        }
+
+        protected override IProjectile SpawnProjectile(int ID, Vector3 position, Vector3 direction)
+        {
+            var projectile = new ServerProjectile(ID, this.ID, position, direction, projectileConfig, networkConfig);
+
+            //projectile.Moved += OnProjectileMoved;
+
+            //networkManager.SendToAll(new ProjectileSpawnMessage(ID, ownerID, position, direction));
+
+            return projectile;
+            //throw new NotImplementedException();
         }
     }
 }

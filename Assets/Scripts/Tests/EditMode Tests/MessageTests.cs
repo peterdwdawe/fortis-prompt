@@ -2,6 +2,7 @@ using LiteNetLib.Utils;
 using NUnit.Framework;
 using Shared.Networking;
 using Shared.Networking.Messages;
+using System;
 using System.Collections.Generic;
 
 public class MessageTests
@@ -18,7 +19,7 @@ public class MessageTests
         System.Numerics.Vector4 v4 = new System.Numerics.Vector4(1f, 2f, 3f, 4f);
         System.Numerics.Quaternion q = new System.Numerics.Quaternion(1f, 2f, 3f, 4f);
 
-        List<INetworkMessage> sentMessages = new List<INetworkMessage>();
+        List<IStandardNetworkMessage> sentMessages = new List<IStandardNetworkMessage>();
 
         var custom = new CustomMessage
             (0
@@ -57,10 +58,10 @@ public class MessageTests
             new System.Numerics.Vector3(2f, 7.3f, -8.1f),
             new System.Numerics.Vector3(1.2f, -6.1f, 5.8f));
 
-        var projRequest = new RequestProjectileSpawnMessage
-            (10,
-            new System.Numerics.Vector3(9.4f, 8.5f, -1.6f),
-            new System.Numerics.Vector3(9.4f, 5.6f, -7f));
+        //var projRequest = new RequestProjectileSpawnMessage
+        //    (10,
+        //    new System.Numerics.Vector3(9.4f, 8.5f, -1.6f),
+        //    new System.Numerics.Vector3(9.4f, 5.6f, -7f));
 
         TestSerialization(writer, reader, v2, NetworkingExtensions.GetVector2, NetworkingExtensions.Put);
         TestSerialization(writer, reader, v3, NetworkingExtensions.GetVector3, NetworkingExtensions.Put);
@@ -79,7 +80,7 @@ public class MessageTests
 
         TestSerialization(writer, reader, projDespawn);
         TestSerialization(writer, reader, projSpawn);
-        TestSerialization(writer, reader, projRequest);
+        //TestSerialization(writer, reader, projRequest);
     }
 
     void TestSerialization<T>(NetDataWriter writer, NetDataReader reader, T testObject)
@@ -98,7 +99,7 @@ public class MessageTests
                 w.Put<T>(o));
     }
 
-    void TestSerialization<T>(NetDataWriter writer, NetDataReader reader, T testObject, Getter<T> Get, Putter<T> Put)
+    void TestSerialization<T>(NetDataWriter writer, NetDataReader reader, T testObject, Func<NetDataReader, T> Get, Action<NetDataWriter, T> Put)
         where T : struct
     {
         writer.Reset();
@@ -109,8 +110,6 @@ public class MessageTests
 
         Assert.AreEqual(testObject, receivedObject);
     }
-    delegate T Getter<T>(NetDataReader reader);
-    delegate void Putter<T>(NetDataWriter writer, T obj);
 
     //// A UnityTest behaves like a coroutine in Play Mode. In Edit Mode you can use
     //// `yield return null;` to skip a frame.

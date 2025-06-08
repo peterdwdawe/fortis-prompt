@@ -8,7 +8,7 @@ using System.Text;
 namespace Shared.Networking.Messages
 {
 
-    public struct PlayerUpdateMessage : INetworkMessage<PlayerUpdateMessage>
+    public struct PlayerUpdateMessage : IStandardNetworkMessage<PlayerUpdateMessage>
     {
         public PlayerUpdateMessage(NetDataReader reader) : this()
         {
@@ -23,7 +23,7 @@ namespace Shared.Networking.Messages
             this.rotation = rotation;
         }
 
-        public MessageType MsgType => MessageType.PlayerUpdate;
+        public StandardMessageType MsgType => StandardMessageType.PlayerUpdate;
 
         public int playerID;
         public Vector2 input;
@@ -47,18 +47,11 @@ namespace Shared.Networking.Messages
             writer.Put(rotation);
         }
 
-        public void Receive(NetPeer peer)
-        {
-            Received?.Invoke(peer, this);
-        }
-
         public bool Equals(PlayerUpdateMessage other)
             => MsgType == other.MsgType
             && playerID == other.playerID
             && input == other.input
             && position == other.position
             && rotation == other.rotation;
-
-        internal static event System.Action<NetPeer, PlayerUpdateMessage> Received;
     }
 }

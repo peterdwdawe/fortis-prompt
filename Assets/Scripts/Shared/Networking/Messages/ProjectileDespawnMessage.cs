@@ -3,9 +3,9 @@ using LiteNetLib.Utils;
 
 namespace Shared.Networking.Messages
 {
-    public struct ProjectileDespawnMessage : INetworkMessage<ProjectileDespawnMessage>
+    public struct ProjectileDespawnMessage : IStandardNetworkMessage<ProjectileDespawnMessage>
     {
-        public MessageType MsgType => MessageType.ProjectileDespawn;
+        public StandardMessageType MsgType => StandardMessageType.ProjectileDespawn;
 
         public int projectileID;
 
@@ -30,15 +30,8 @@ namespace Shared.Networking.Messages
             writer.Put(projectileID);
         }
 
-        public void Receive(NetPeer peer)
-        {
-            Received?.Invoke(peer, this);
-        }
-
         public bool Equals(ProjectileDespawnMessage other)
             => MsgType == other.MsgType
             && projectileID == other.projectileID;
-
-        internal static event System.Action<NetPeer, ProjectileDespawnMessage> Received;
     }
 }

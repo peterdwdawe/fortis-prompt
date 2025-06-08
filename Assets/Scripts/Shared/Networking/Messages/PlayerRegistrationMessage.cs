@@ -4,9 +4,9 @@ using System.Numerics;
 
 namespace Shared.Networking.Messages
 {
-    public struct PlayerRegistrationMessage : INetworkMessage<PlayerRegistrationMessage>
+    public struct PlayerRegistrationMessage : IStandardNetworkMessage<PlayerRegistrationMessage>
     {
-        public MessageType MsgType => MessageType.PlayerRegistration;
+        public StandardMessageType MsgType => StandardMessageType.PlayerRegistration;
 
         public int playerID;
         public bool localPlayer;
@@ -36,16 +36,9 @@ namespace Shared.Networking.Messages
             writer.Put(localPlayer);
         }
 
-        public void Receive(NetPeer peer)
-        {
-            Received?.Invoke(peer, this);
-        }
-
         public bool Equals(PlayerRegistrationMessage other)
             => MsgType == other.MsgType
             && playerID == other.playerID
             && localPlayer == other.localPlayer;
-
-        internal static event System.Action<NetPeer, PlayerRegistrationMessage> Received;
     }
 }
