@@ -32,7 +32,7 @@ namespace Shared.Configuration
     public class GameConfigData : INetSerializable, System.IEquatable<GameConfigData>
     {
         //Max # of clients allowed to connect
-        public byte MaxPlayerCount { get; set; } = 8;
+        public byte MaxPlayerCount { get; set; } = 16;
 
         //Player speed in m/s
         public float PlayerMoveSpeed { get; set; } = 4f;

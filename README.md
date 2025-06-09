@@ -10,23 +10,35 @@ On the client build, just enter the server address and port you want to connect 
 ### Local Setup
 Running the server and multiple instances of the client all on one machine is the only way I've tested so far, and is straightforward. On the client side, the address defaults to localhost:5000, so it should work out of the box.
 ### Configuration
-Configuration [currently leaves a lot to be desired](#issues-and-limitations). To change any setting, you need to change the associated .json file on both the client and server side. The settings are as follows:
+Both the client and server builds use .json files to store configurations. Packaged with the server are ServerConfig.json and GameConfig.json. All the values in GameConfig are sent to clients as they connect and available during gameplay. ClientConfig.json holds any client-only configuration data. The settings are as follows:
 
-**NetworkConfig.json:**
+**ServerConfig.json:**
 | Property | Type | Description | Default |
 | --- | --- | --- | --- |
-| **NetworkConfig**.TickInterval | float | Time in seconds between NetworkManager ticks | 0.02 |
-| **NetworkConfig**.MaxPlayers | byte | Max player count, after which the server will reject connections | 16 |
-| **NetworkConfig**.PlayerUpdateTickCount | ushort | A client waits this many ticks between sending control and transform updates | 4 |
-| **NetworkConfig**.TestNetworkKey | string | Must match on client and server to establish connection | "fortis_connect_test" |
-| **PlayerConfig**.MovementSpeed | float | Player speed in m/s | 4.0 |
-| **PlayerConfig**.RotationSpeed | float | Not really a rotation speed per se, each tick Player slerps toward desired rotation using this as "t"| 0.25 |
-| **PlayerConfig**.Radius | float | Player radius in metres, used to calculate projectile hits only | 0.5 |
-| **PlayerConfig**.MaxHP | int | player Max/Spawn HP | 100 |
-| **PlayerConfig**.RespawnTime | float | Respawn time in seconds | 5.0 |
-| **ProjectileConfig**.Damage | int | damage dealth when a player is hit by a projectile | 25 |
-| **ProjectileConfig**.MovementSpeed | float | Projectile speed in m/s | 8.0 |
-| **ProjectileConfig**.Duration | float | Projectile lifetime in seconds, if it doesn't hit anything. | 4.0 |
+| ServerTickInterval | float | Time between server updates, in seconds | 0.015 |
+| Port | int | Port number to run on | 5000 |
+| NetworkKey | string | Must match ClientConfig.NetworkKey to connect successfully | fortis_connect_test |
+| RpcTimeout | float | Duration, in seconds, to wait for an rpc response before returning a failure | 1.0 |
+
+**ClientConfig.json:**
+| Property | Type | Description | Default |
+| --- | --- | --- | --- |
+| PlayerUpdateInterval | float | Time between transform & controls updates, in seconds | 0.05 |
+| NetworkKey | string | Must match ServerConfig.NetworkKey to connect successfully | fortis_connect_test |
+| RpcTimeout | float | Duration, in seconds, to wait for an rpc response before returning a failure | 1.0 |
+
+**GameConfig.json:**
+| Property | Type | Description | Default |
+| --- | --- | --- | --- |
+| MaxPlayerCount | byte | Max # of clients allowed to connect | 16 |
+| PlayerMoveSpeed | float | Player speed in m/s | 4.0 |
+| PlayerRotateSpeed | float | Player rotation speed in rotations/second | 2.0 |
+| PlayerRadius | float | Player capsule radius in metres | 0.5 |
+| PlayerMaxHP | int | Player max HP | 100 |
+| PlayerRespawnTime | float | Player respawn time in seconds | 5.0 |
+| ProjectileDamage | int | Projectile damage dealt on hit | 25 |
+| ProjectileSpeed | float | Projectile speed in m/s | 8.0 |
+| ProjectileLifetime | float | Projectile lifetime in seconds | 4.0 |
 
 ## Info
 
@@ -71,9 +83,8 @@ Configuration [currently leaves a lot to be desired](#issues-and-limitations). T
 - [ ] Expand on unit tests
 - [ ] Player collision, if time permits
 - [ ] Bots, if time permits
-- [ ] Improve configs 
-  - [ ] If I have time, an editor window in Unity would be great
-  - [ ] Maybe store configs on server side only, and send them over to client when connecting to ensure sync?
+- [X] Improve configs 
+  - [X] Maybe store configs on server side only, and send them over to client when connecting to ensure sync?
 
 
 ## Next Steps
@@ -90,12 +101,12 @@ Configuration [currently leaves a lot to be desired](#issues-and-limitations). T
 
 **Server:**
 - [X] Spawn/Despawn Players on Connect/Disconnect
-- [ ] Projectiles
+- [X] Projectiles
   - [X] Registration/instantiation on request
   - [X] Hit detection
     -[X] Player health reduction
     -[X] Projectile destruction
-  - [ ] Use RPC for above features
+  - [X] Use RPC for above features
 - [X] Update and forward character controls and transform data when received
 - [X] Detect character death, despawn
 - [X] Respawn characters after death
@@ -106,10 +117,10 @@ Configuration [currently leaves a lot to be desired](#issues-and-limitations). T
 - [X] Spawn/Despawn Networked Players on Request
 - [X] Send local controls + position/rotation on tick
 - [X] Update Networked character controls + position/rotation on request
-- [ ] Projectiles
+- [X] Projectiles
   - [X] Request projectile creation from server
   - [X] Instantiation/destruction on request
-  - [ ] Use RPC for above features
+  - [X] Use RPC for above features
         
 **Shared:**
 - [X] Movement + Prediction
