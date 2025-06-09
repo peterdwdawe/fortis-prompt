@@ -68,7 +68,7 @@ The server build targets .NET 8.0 and the client was built using Unity 2022.3.62
 - [X] Merge common client/server functions
 - [X] Abstract into interfaces as much as possible, reduce references to concrete classes
 - [X] Refactor to use composition as much as possible vs inheritence
-- [X] Review folder structure (including config save locations) and mirror it in namespaces
+- [ ] Review folder structure (including config save locations) and mirror it in namespaces
 - [ ] Sort functions, properties, events, etc. consistently across project to improve readability
 - [ ] Add/Improve Comments
 
@@ -84,9 +84,9 @@ The server build targets .NET 8.0 and the client was built using Unity 2022.3.62
 - Server Authority: let server decide if movement is valid - i.e. character delta position not too large. Force correction if not
 - Improve interpolation when receiving position updates
 - Lag compensation / tick synchronization for players and projectiles
-- Improve configs:
-  - Consider storing configs on server, and sending that data to clients when they connect? Right now two copies are stored, one on client side and one on server side. Fine for testing but a nightmare if shipped.
-  - A better config editor would be great,  e.g. a ScriptableObject or Unity Editor window that can export to json on build for the server to use 
+- Implement collisions
+- Implement bots
+- Improve code coverage
 - Other Ideas?
 
 ## Prompt Checklist
