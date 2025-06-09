@@ -1,14 +1,13 @@
 ﻿using LiteNetLib;
-using Shared.Configuration;
 using Shared.Networking;
 using Shared.Networking.Messages;
 using Shared.Networking.RPC;
 
 namespace Client.Adapters.Networking
 {
-    public class ClientNetworkManager : NetworkManager, INetworkClient
+    public class NetworkClient : NetworkManager, INetworkClient
     {
-        public ClientNetworkManager(float rpcTimeout, string networkKey) : base(rpcTimeout, networkKey) { }
+        public NetworkClient(float rpcTimeout, string networkKey) : base(rpcTimeout, networkKey) { }
 
         public void ConnectToServer(string serverAddress, int serverPort)
         {

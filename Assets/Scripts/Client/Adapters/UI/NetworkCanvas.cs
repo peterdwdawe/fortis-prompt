@@ -59,7 +59,8 @@ namespace Client.Adapters.UI
         void Update()
         {
             stateTimer += Time.deltaTime;
-            if (currentState == NetworkManager.ConnectionState.Started && stateTimer >= startedStateMaxDuration)
+            if (currentState == NetworkManager.ConnectionState.Started 
+                && stateTimer >= startedStateMaxDuration)
             {
                 StopClient();
             }

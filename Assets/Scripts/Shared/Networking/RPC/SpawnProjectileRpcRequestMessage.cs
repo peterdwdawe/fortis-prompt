@@ -1,5 +1,4 @@
 ﻿using LiteNetLib.Utils;
-using System;
 using System.Numerics;
 
 namespace Shared.Networking.RPC
@@ -45,6 +44,5 @@ namespace Shared.Networking.RPC
             && ownerID == other.ownerID
             && position == other.position
             && direction == other.direction;
-
     }
 }

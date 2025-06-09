@@ -1,4 +1,3 @@
-using Shared.Projectiles;
 using System;
 using System.Numerics;
 
@@ -31,6 +30,6 @@ namespace Shared.Player
         void Spawn(Vector3 position, Quaternion rotation);
         void Kill();
         void Destroy();
-        IProjectile Shoot(int projectileID, Vector3 position, Vector3 direction);
+        void Shoot(int projectileID, Vector3 position, Vector3 direction);
     }
 }

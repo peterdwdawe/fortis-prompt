@@ -1,9 +1,7 @@
-namespace Shared.Configuration
+namespace Client.Configuration
 {
     public class ClientConfig
     {
-        //TODO(); should be in client proj and namespace
-
         private readonly ClientConfigData savedData;
 
         public ClientConfig(ClientConfigData savedData)

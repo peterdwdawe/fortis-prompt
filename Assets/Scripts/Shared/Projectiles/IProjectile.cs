@@ -15,6 +15,6 @@ namespace Shared.Projectiles
         Vector3 Direction { get; }
 
         void Update(float deltaTime);
-        void Destroy();
+        void Destroy(bool immediate);
     }
 }

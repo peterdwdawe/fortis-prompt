@@ -20,7 +20,7 @@ namespace Server
             lifetimeTimer+= deltaTime;
             if (lifetimeTimer >= lifetime)
             {
-                Expired = true;
+                Destroy(false);
                 //don't need to return - that's taken care of in base.Tick()
             }
 

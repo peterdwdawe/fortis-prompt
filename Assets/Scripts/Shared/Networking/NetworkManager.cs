@@ -1,6 +1,5 @@
 ﻿using LiteNetLib;
 using LiteNetLib.Utils;
-using Shared.Configuration;
 using Shared.Networking.Messages;
 using Shared.Networking.RPC;
 using System;
@@ -8,7 +7,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading.Tasks;
 
 namespace Shared.Networking
 {
@@ -23,12 +21,7 @@ namespace Shared.Networking
 
         protected readonly NetDataWriter _dataWriter;
 
-        public bool started { get; private set; } = false;
-
-        //protected readonly float tickInterval;
-        float CurrentTime = 0f;
-
-        public NetworkManager(float rpcTimeout, string networkKey)
+        protected NetworkManager(float rpcTimeout, string networkKey)
         {
             _rpcTimeout = rpcTimeout;
             _networkKey = networkKey;
@@ -43,53 +36,13 @@ namespace Shared.Networking
             _listener.NetworkErrorEvent += OnNetworkError;
 
             _netManager = new NetManager(_listener);
-            //_netManager.UpdateTime = _networkConfig.TickIntervalMS();
             _netManager.EnableStatistics = true;
-            _netManager.ChannelsCount = 3;
+            _netManager.ChannelsCount = (byte)ChannelType.LAST;
         }
 
-        protected bool awaitingRpc = false;
-        protected Queue<(NetPeer, IStandardNetworkMessage)> queuedMessageReceives = new Queue<(NetPeer, IStandardNetworkMessage)>();
+        public bool started { get; private set; } = false;
 
-
-        public bool IsConnected()
-            => started && _netManager.ConnectedPeersCount > 0;
-
-        public void Update(float deltaTime)
-        {
-            if (!started)
-                return;
-
-            CurrentTime += deltaTime;
-
-            while(queuedMessageReceives.Count > 0)
-            {
-                (var peer, var msg) = queuedMessageReceives.Dequeue();
-
-                OnReceiveStandardMessage(peer, msg);
-            }
-
-            _netManager.PollEvents();
-        }
-
-        NetworkStatistics lastStats = NetworkStatistics.Empty;
-
-        public NetworkStatistics GetTotalStatistics()
-        {
-            return new NetworkStatistics(
-                _netManager.Statistics.BytesSent,
-                _netManager.Statistics.BytesReceived,
-                CurrentTime
-                );
-        }
-
-        public NetworkStatistics GetDiffStatistics()
-        {
-            var currentStats = GetTotalStatistics();
-            var diff = new NetworkStatistics(lastStats, currentStats);
-            lastStats = currentStats;
-            return diff;
-        }
+        private float CurrentTime = 0f;
 
         public bool TryStartNetworking(int port = 0)
         {
@@ -108,9 +61,24 @@ namespace Shared.Networking
             return true;
         }
 
-        delegate bool StartNetworkFunction();
+        public void Update(float deltaTime)
+        {
+            if (!started)
+                return;
 
-        public void Stop()
+            CurrentTime += deltaTime;
+
+            while(queuedMessageReceives.Count > 0)
+            {
+                (var peer, var msg) = queuedMessageReceives.Dequeue();
+
+                OnReceiveStandardMessage(peer, msg);
+            }
+
+            _netManager.PollEvents();
+        }
+
+        public void StopNetworking()
         {
             if (!started)
                 return;
@@ -130,58 +98,7 @@ namespace Shared.Networking
             PeerConnected?.Invoke(peer.Id);
         }
 
-        protected enum ChannelType : byte
-        {
-            Standard = 0,
-            RpcRequest = 1,
-            RpcResponse = 2,
-        }
-
-        void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber, DeliveryMethod deliveryMethod)
-        {
-            switch ((ChannelType)channelNumber)
-            {
-
-                case ChannelType.Standard:
-
-
-                    if (!reader.TryReadStandardNetworkMessage(out var stdMsg))
-                    {
-                        Log($"Unknown Standard Message Received -  did you forget to register it with TryReadNetworkMessage?");
-                        break;
-                    }
-                    if (awaitingRpc)
-                    {
-                        queuedMessageReceives.Enqueue((peer, stdMsg));
-                    }
-                    else
-                    {
-                        OnReceiveStandardMessage(peer, stdMsg);
-                    }
-                    break;
-
-                case ChannelType.RpcRequest:
-                    OnReceiveRpcRequest(peer, reader, deliveryMethod);
-                    break;
-                case ChannelType.RpcResponse:
-
-                    if (!reader.TryReadRpcResponseMessage(out var rpcResponse))
-                    {
-                        Log($"Unknown RpcResponse Message Received -  did you forget to register it with TryReadRpcResponseMessage?");
-                        return;
-                    }
-
-                    receivedResponse = rpcResponse;
-                    break;
-
-                default:
-                    Log($"Error: Message received on unregistered channel: {channelNumber}.");
-                    break;
-            }
-            reader.Recycle();
-        }
-
-        void OnPeerDisconnected(NetPeer peer, DisconnectInfo disconnectInfo)
+        private void OnPeerDisconnected(NetPeer peer, DisconnectInfo disconnectInfo)
         {
             string peerName = peer != null ? $"{peer.Id} ({peer})" : "Null connection";
 
@@ -189,10 +106,37 @@ namespace Shared.Networking
             PeerDisconnected?.Invoke(peer.Id);
         }
 
-        void OnNetworkError(IPEndPoint endPoint, SocketError socketErrorCode)
+        private void OnNetworkError(IPEndPoint endPoint, SocketError socketErrorCode)
         {
             Log($"Error: {socketErrorCode}");
         }
+
+        #region Bandwidth Tracking
+
+        NetworkStatistics lastStats = NetworkStatistics.Empty;
+
+        public NetworkStatistics GetTotalStatistics()
+        {
+            return new NetworkStatistics(
+                _netManager.Statistics.BytesSent,
+                _netManager.Statistics.BytesReceived,
+                CurrentTime
+                );
+        }
+
+        public NetworkStatistics GetDiffStatistics()
+        {
+            var currentStats = GetTotalStatistics();
+            var diff = new NetworkStatistics(lastStats, currentStats);
+            lastStats = currentStats;
+            return diff;
+        }
+        #endregion
+
+        #region Connection Status
+
+        public bool IsConnected()
+            => started && _netManager.ConnectedPeersCount > 0;
 
         public enum ConnectionState : byte
         {
@@ -222,9 +166,7 @@ namespace Shared.Networking
         ConnectionState GetConnectionState()
         {
             if (!started)
-            {
                 return ConnectionState.Inactive;
-            }
 
             if (IsConnected())
                 return ConnectionState.Connected;
@@ -232,17 +174,18 @@ namespace Shared.Networking
             return ConnectionState.Started;
         }
 
-        public event Action<int> PeerConnected;
-        public event Action<int> PeerDisconnected;
-        public event Action NetworkStarted;
-        public event Action NetworkStopped;
+        protected void Log(string str) 
+            => MessageLogged?.Invoke(str);
 
-        protected void Log(string str)
+        protected enum ChannelType : byte
         {
-            MessageLogged?.Invoke(str);
+            Standard = 0,
+            RpcRequest = 1,
+            RpcResponse = 2,
+            LAST
         }
 
-        public event Action<string> MessageLogged;
+        #endregion
 
         #region Send Functions
 
@@ -313,11 +256,56 @@ namespace Shared.Networking
         protected void SendToFirstPeer(INetSerializable message, ChannelType channelType, DeliveryMethod deliveryMethod)
             => SendTo(_netManager.FirstPeer, message, channelType, deliveryMethod);
 
-        public void SendRpcResponseTo(NetPeer peer, IRpcResponseMessage message)
-            => SendTo(peer, message, ChannelType.RpcResponse, DeliveryMethod.ReliableUnordered);
         #endregion
 
         #region Receive functions
+
+        void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber, DeliveryMethod deliveryMethod)
+        {
+            switch ((ChannelType)channelNumber)
+            {
+                case ChannelType.Standard:
+                    if (!reader.TryReadStandardNetworkMessage(out var stdMsg))
+                    {
+                        Log($"Unknown Standard Message Received -  did you forget to register it with TryReadNetworkMessage?");
+                        break;
+                    }
+
+                    if (awaitingRpc)
+                        queuedMessageReceives.Enqueue((peer, stdMsg));
+                    else
+                        OnReceiveStandardMessage(peer, stdMsg);
+                    break;
+
+                case ChannelType.RpcRequest:
+                    if (!reader.TryReadRpcRequestMessage(out var rpcRequest))
+                    {
+                        Log($"Unknown RpcRequest Message Received -  did you forget to register it with TryReadRpcRequestMessage?");
+                        break;
+                    }
+
+                    OnReceiveRpcRequest(peer, rpcRequest);
+                    break;
+
+                case ChannelType.RpcResponse:
+                    if (!reader.TryReadRpcResponseMessage(out var rpcResponse))
+                    {
+                        Log($"Unknown RpcResponse Message Received -  did you forget to register it with TryReadRpcResponseMessage?");
+                        break;
+                    }
+
+                    if (awaitingRpc)
+                        receivedResponse = rpcResponse;
+                    else
+                        Log($"Received RpcResponse: {rpcResponse.MsgType} without requesting it. ignoring...");
+                    break;
+
+                default:
+                    Log($"Error: Message received on unregistered channel: {channelNumber}.");
+                    break;
+            }
+            reader.Recycle();
+        }
 
         void OnReceiveStandardMessage(NetPeer peer, IStandardNetworkMessage msg)
         {
@@ -363,44 +351,40 @@ namespace Shared.Networking
             }
         }
 
-        void OnReceiveRpcRequest(NetPeer peer, NetPacketReader reader, DeliveryMethod deliveryMethod)
+        IRpcResponseMessage receivedResponse = null;
+
+        void OnReceiveRpcRequest(NetPeer peer, IRpcRequestMessage request)
         {
-            if (!reader.TryReadRpcRequestMessage(out var msg))
+            if(!TryExecuteRpcRequest(peer, (SpawnProjectileRpcRequestMessage)request, out IRpcResponseMessage response))
             {
-                Log($"Unknown RpcRequest Message Received -  did you forget to register it with TryReadRpcRequestMessage?");
+                Log($"Unhandled RpcRequest Message Received: {request.MsgType}!");
                 return;
-            }
-
-            IRpcResponseMessage response;
-
-            switch (msg.MsgType)
-            {
-                case RpcMessageType.SpawnProjectile:
-                    response = ExecuteRpcRequest(peer, (SpawnProjectileRpcRequestMessage)msg);
-                    break;
-
-                default:
-                    Log($"Unhandled RpcRequest Message Received: {msg.MsgType}!");
-                    return;
             }
 
             SendRpcResponseTo(peer, response);
         }
 
-        IRpcResponseMessage receivedResponse = null;
-
-        IRpcResponseMessage ExecuteRpcRequest(NetPeer peer, IRpcRequestMessage msg)
+        bool TryExecuteRpcRequest(NetPeer peer, IRpcRequestMessage request, out IRpcResponseMessage response)
         {
-            switch (msg.MsgType)
+            switch (request.MsgType)
             {
                 case RpcMessageType.SpawnProjectile:
-                    return SpawnProjectileHandler(peer, (SpawnProjectileRpcRequestMessage)msg);
+                    response = SpawnProjectileHandler(peer, (SpawnProjectileRpcRequestMessage)request);
+                    return true;
 
                 default:
-                    Log($"Unhandled RpcRequest Message Received: {msg.MsgType}!");
-                    return default;
+                    response = null;
+                    return false;
             }
         }
+
+
+        #endregion
+
+        #region Rpc Send & Receive
+
+        protected bool awaitingRpc = false;
+        protected Queue<(NetPeer, IStandardNetworkMessage)> queuedMessageReceives = new Queue<(NetPeer, IStandardNetworkMessage)>();
 
         protected TResponse SendRpcRequest<TResponse>(int playerID, IRpcRequestMessage<TResponse> message)
             where TResponse : IRpcResponseMessage
@@ -416,13 +400,11 @@ namespace Shared.Networking
             return WaitForRpcResponse<TResponse>();
         }
 
-        int rpcTimeoutMS => (int)(_rpcTimeout * 1000);
-
         protected TResponse WaitForRpcResponse<TResponse>()
             where TResponse : IRpcResponseMessage
         {
             //Log("WaitForRpcResponse!");
-
+            int rpcTimeoutMS = (int)(_rpcTimeout * 1000);
             try
             {
                 awaitingRpc = true;
@@ -433,8 +415,8 @@ namespace Shared.Networking
                     _netManager.PollEvents();
                 }
             }
-            finally 
-            { 
+            finally
+            {
                 awaitingRpc = false;
             }
 
@@ -459,6 +441,21 @@ namespace Shared.Networking
             }
         }
 
+        private void SendRpcResponseTo(NetPeer peer, IRpcResponseMessage message)
+            => SendTo(peer, message, ChannelType.RpcResponse, DeliveryMethod.ReliableUnordered);
+
+        #endregion
+
+        #region Events
+
+        public event Action<int> PeerConnected;
+        public event Action<int> PeerDisconnected;
+
+        public event Action NetworkStarted;
+        public event Action NetworkStopped;
+
+        public event Action<string> MessageLogged;
+
         public event Action<CustomMessage> CustomMessageReceived;
         public event Action<GameConfigurationMessage> GameConfigReceived;
 
@@ -471,6 +468,10 @@ namespace Shared.Networking
 
         public event Action<ProjectileSpawnMessage> ProjectileSpawned;
         public event Action<ProjectileDespawnMessage> ProjectileDespawned;
+
+        #endregion
+
+        #region Rpc Handlers
 
         public RpcRequestHandler<SpawnProjectileRpcRequestMessage, SpawnProjectileRpcResponseMessage> SpawnProjectileHandler 
             = CantHandleRequest<SpawnProjectileRpcRequestMessage, SpawnProjectileRpcResponseMessage>;

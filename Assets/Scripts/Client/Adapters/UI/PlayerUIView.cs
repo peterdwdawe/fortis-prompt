@@ -49,7 +49,8 @@ namespace Client.Adapters.UI
             Vector3 screenPoint = cam.WorldToScreenPoint(player.transform.position + positionOffset);
             screenPoint.z = 0;
 
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(parentRectTransform, screenPoint, null, out Vector2 scaledScreenPos);
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                parentRectTransform, screenPoint, null, out Vector2 scaledScreenPos);
 
             rectTransform.anchoredPosition = scaledScreenPos;
         }

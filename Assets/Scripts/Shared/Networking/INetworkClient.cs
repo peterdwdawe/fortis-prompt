@@ -8,8 +8,10 @@ namespace Shared.Networking
     {
         void ConnectToServer(string serverAddress, int serverPort);
 
-        void Send(IStandardNetworkMessage message, DeliveryMethod deliveryMethod = DeliveryMethod.ReliableOrdered);
+        void Send(IStandardNetworkMessage message, 
+            DeliveryMethod deliveryMethod = DeliveryMethod.ReliableOrdered);
 
-        TResponse SendRpcRequest<TResponse>(IRpcRequestMessage<TResponse> message) where TResponse : IRpcResponseMessage;
+        TResponse SendRpcRequest<TResponse>(IRpcRequestMessage<TResponse> message) 
+            where TResponse : IRpcResponseMessage;
     }
 }

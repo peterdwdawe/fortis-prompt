@@ -1,21 +1,21 @@
 using LiteNetLib;
-using Shared.Configuration;
 using Shared.Networking;
 using Shared.Networking.Messages;
 using Shared.Networking.RPC;
-using System;
 
 namespace Server
 {
-    public class ServerNetworkManager : NetworkManager, INetworkServer
+    public class NetworkServer : NetworkManager, INetworkServer
     {
         private readonly byte _maxPlayers;
 
-        public ServerNetworkManager(float rpcTimeout, string networkKey, byte maxPlayers) : base(rpcTimeout, networkKey)
+        public NetworkServer(float rpcTimeout, string networkKey, byte maxPlayers) 
+            : base(rpcTimeout, networkKey)
         {
             _maxPlayers = maxPlayers;
             _listener.ConnectionRequestEvent += OnConnectionRequest;
         }
+
         private void OnConnectionRequest(ConnectionRequest request)
         {
             if (_netManager.ConnectedPeersCount < _maxPlayers)

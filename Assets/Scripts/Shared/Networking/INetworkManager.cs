@@ -1,6 +1,4 @@
-﻿using LiteNetLib;
-using Shared.Networking.RPC;
-using System;
+﻿using System;
 
 namespace Shared.Networking
 {
@@ -15,7 +13,7 @@ namespace Shared.Networking
         event Action<string> MessageLogged;
 
         bool TryStartNetworking(int port = 0);
-        void Stop();
+        void StopNetworking();
 
         bool started { get; }
         bool IsConnected();
@@ -26,7 +24,5 @@ namespace Shared.Networking
         NetworkStatistics GetTotalStatistics();
 
         void Update(float deltaTime);
-
-        void SendRpcResponseTo(NetPeer peer, IRpcResponseMessage message);
     }
 }

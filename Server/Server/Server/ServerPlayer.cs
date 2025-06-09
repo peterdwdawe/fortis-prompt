@@ -31,9 +31,7 @@ namespace Server
                 deadTimer += deltaTime;
 
                 if (deadTimer >= respawnWaitTime)
-                {
                     SpawnAtRandomLocation();
-                }
             }
         }
 
@@ -53,10 +51,8 @@ namespace Server
                  (float)(random.NextDouble() * 8f) - 4f);
         }
 
-        protected override void ShootLocal()
-        {
-            Console.WriteLine("Error: ShootLocal called on server!");
-        }
+        protected override void ShootLocal() 
+            => Console.WriteLine("Error: ShootLocal called on server!");
 
         protected override IProjectile SpawnProjectile(int ID, Vector3 position, Vector3 direction) 
             => new ServerProjectile(ID, this.ID, position, direction, gameConfig);

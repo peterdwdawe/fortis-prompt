@@ -1,5 +1,4 @@
-﻿using LiteNetLib;
-using LiteNetLib.Utils;
+﻿using LiteNetLib.Utils;
 
 namespace Shared.Networking.Messages
 {

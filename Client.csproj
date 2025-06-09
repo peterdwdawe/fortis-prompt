@@ -64,13 +64,14 @@
     <Compile Include="Assets\Scripts\Client\Adapters\Projectiles\ProjectileView.cs" />
     <Compile Include="Assets\Scripts\Client\Adapters\UI\PlayerUIView.cs" />
     <Compile Include="Assets\Scripts\Client\Adapters\Player\ClientPlayer.cs" />
+    <Compile Include="Assets\Scripts\Client\GameClient.cs" />
     <Compile Include="Assets\Scripts\Client\GameManagerComponent.cs" />
     <Compile Include="Assets\Scripts\Client\Adapters\UI\LogGroup.cs" />
     <Compile Include="Assets\Scripts\Client\Adapters\NumericsExtensions.cs" />
-    <Compile Include="Assets\Scripts\Client\Adapters\Networking\ClientNetworkManager.cs" />
+    <Compile Include="Assets\Scripts\Client\Adapters\Networking\NetworkClient.cs" />
+    <Compile Include="Assets\Scripts\Client\Configuration\ClientConfig.cs" />
     <Compile Include="Assets\Scripts\Client\Input\LocalInputListener.cs" />
     <Compile Include="Assets\Scripts\Client\Adapters\Player\PlayerView.cs" />
-    <Compile Include="Assets\Scripts\Client\ClientGameManager.cs" />
     <Compile Include="Assets\Scripts\Client\Adapters\UI\NetworkCanvas.cs" />
     <Compile Include="Assets\Scripts\Client\Adapters\UI\GameCanvas.cs" />
   </ItemGroup>
@@ -938,6 +939,14 @@
       <HintPath>C:\Program Files\Unity\Hub\Editor\2022.3.62f1\Editor\Data\NetStandard\compat\2.1.0\shims\netfx\System.Xml.Serialization.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="LiteNetLib">
+      <HintPath>Library\ScriptAssemblies\LiteNetLib.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.TextMeshPro">
+      <HintPath>Library\ScriptAssemblies\Unity.TextMeshPro.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="UnityEditor.UI">
       <HintPath>Library\ScriptAssemblies\UnityEditor.UI.dll</HintPath>
       <Private>False</Private>
@@ -948,17 +957,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="LiteNetLib.csproj">
-      <Project>{90CF8320-1373-5ACA-AA7C-749B05CAF167}</Project>
-      <Name>LiteNetLib</Name>
-    </ProjectReference>
     <ProjectReference Include="Shared.csproj">
       <Project>{A975588F-D6A1-F07A-5B5F-722795E106CC}</Project>
       <Name>Shared</Name>
-    </ProjectReference>
-    <ProjectReference Include="Unity.TextMeshPro.csproj">
-      <Project>{F54D7FFB-FD54-9309-CC66-F5619FCBDB93}</Project>
-      <Name>Unity.TextMeshPro</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -9,16 +9,32 @@ namespace Client
     {
         [SerializeField] private LocalInputListener _localInputListener;
 
-        ClientGameManager _manager;
+        public event Action<string> MessageLogged;
+
+        public event Action<NetworkManager.ConnectionState> StateChanged;
+
+        public void StartClient(string address, int port)
+        {
+            client.ConnectToServer(address, port);
+        }
+
+        public void StopClient()
+        {
+            client.StopNetworking();
+        }
 
         public NetworkStatistics GetNetworkDiffStatistics()
-            => _manager.GetNetworkDiffStatistics();
+        {
+            return client.GetNetworkDiffStatistics();
+        }
+
+        private GameClient client;
 
         private void Awake()
         {
-            _manager = new ClientGameManager(_localInputListener);
-            _manager.StateChanged += _manager_StateChanged;
-            _manager.MessageLogged += _manager_MessageLogged;
+            client = new GameClient(_localInputListener);
+            client.StateChanged += OnStateChanged;
+            client.MessageLogged += OnMessageLogged;
         }
 
         private void Start()
@@ -26,34 +42,19 @@ namespace Client
             StateChanged?.Invoke(NetworkManager.ConnectionState.Uninitialized);
         }
 
-        public event Action<string> MessageLogged;
-
-        private void _manager_MessageLogged(string obj)
+        private void Update()
         {
-            MessageLogged?.Invoke(obj);
+            client.Update(Time.deltaTime);
         }
 
-        public event Action<NetworkManager.ConnectionState> StateChanged;
-
-        private void _manager_StateChanged(Shared.Networking.NetworkManager.ConnectionState obj)
+        private void OnStateChanged(Shared.Networking.NetworkManager.ConnectionState obj)
         {
             StateChanged?.Invoke(obj);
         }
 
-        private void Update()
+        private void OnMessageLogged(string obj)
         {
-            _manager.Update(Time.deltaTime);
+            MessageLogged?.Invoke(obj);
         }
-
-        public void StartClient(string address, int port)
-        {
-            _manager.ConnectToServer(address, port);
-        }
-
-        public void StopClient()
-        {
-            _manager.StopNetworking();
-        }
-
     }
 }

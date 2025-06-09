@@ -6,6 +6,7 @@ using UnityEngine;
 using Shared.Networking;
 using Shared.Projectiles;
 using Client.Adapters.Projectiles;
+using Client.Configuration;
 
 namespace Client.Adapters.Player
 {
@@ -16,7 +17,8 @@ namespace Client.Adapters.Player
 
         float timeSinceLastUpdate = 0f;
 
-        public ClientPlayer(int id, IInputListener inputListener, bool localPlayer, GameConfig gameConfig, ClientConfig clientConfig, INetworkClient netClient) 
+        public ClientPlayer(int id, IInputListener inputListener, bool localPlayer, 
+            GameConfig gameConfig, ClientConfig clientConfig, INetworkClient netClient) 
             : base(id, inputListener, localPlayer, gameConfig)
         {
             this.netClient = netClient;
@@ -28,9 +30,7 @@ namespace Client.Adapters.Player
             base.Update(deltaTime);
 
             if (!LocalPlayer)
-            {
                 return;
-            }
 
             if (Alive)
             {
@@ -76,13 +76,12 @@ namespace Client.Adapters.Player
         {
             var projectile = new Projectile(ID, this.ID, position, direction, gameConfig);
 
-            ProjectileView projectileView = UnityEngine.Object.Instantiate(Resources.Load<ProjectileView>("Projectile"));
+            ProjectileView projectileView = Object.Instantiate(Resources.Load<ProjectileView>("Projectile"));
+
             projectileView.Setup(projectile);
 
             if (LocalPlayer)
-            {
                 netClient.Send(new ProjectileSpawnMessage(ID, this.ID, position, direction));
-            }
 
             return projectile;
         }

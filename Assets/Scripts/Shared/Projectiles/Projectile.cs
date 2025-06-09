@@ -12,14 +12,14 @@ namespace Shared.Projectiles
         private readonly Vector3 _direction;
         public Vector3 Direction => _direction;
         public Vector3 Position { get; private set; }
-        public bool Expired { get; protected set; }
+        public bool Expired { get; private set; } = false;
         public int ID { get; private set; }
         public int ownerID { get; private set; }
         private readonly GameConfig gameConfig;
 
-        public Projectile(int Id, int ownerID, Vector3 initialPosition, Vector3 direction, GameConfig gameConfig)
+        public Projectile(int ID, int ownerID, Vector3 initialPosition, Vector3 direction, GameConfig gameConfig)
         {
-            this.ID = Id;
+            this.ID = ID;
             this.ownerID = ownerID;
 
             Position = initialPosition;
@@ -38,10 +38,11 @@ namespace Shared.Projectiles
             Moved?.Invoke(this);
         }
 
-        public virtual void Destroy() 
+        public virtual void Destroy(bool immediate) 
         {
             Expired = true;
-            Destroyed?.Invoke(this);
+            if(immediate)
+                Destroyed?.Invoke(this);
         }
     }
 }

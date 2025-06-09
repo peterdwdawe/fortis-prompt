@@ -41,7 +41,7 @@ namespace Shared.Configuration
         public float PlayerRotateSpeed { get; set; } = 2f;
 
         //Player capsule radius in metres
-        public float PlayerRadius { get; set; } = 0.5f;       //TODO: (should affect capsule radius)
+        public float PlayerRadius { get; set; } = 0.5f;
 
         //Player max HP
         public int PlayerMaxHP { get; set; } = 100;

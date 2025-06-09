@@ -1,6 +1,4 @@
 ﻿using LiteNetLib;
-using Server;
-using Shared.Networking;
 using System;
 using System.Diagnostics;
 using System.Threading;
@@ -10,38 +8,16 @@ namespace Server
 
     internal class Program
     {
-        const int DEFAULT_PORT = 5000;
-
         private static void Main(string[] args)
         {
             Console.CursorVisible = false;
 
-            //int port = DEFAULT_PORT;
-
-            ////first arg can be optionally given to specify port
-            //if (args == null || args.Length < 1)
-            //{
-            //    Console.WriteLine(
-            //        $"To run on a particular port, pass it in as a command-line argument.\n" +
-            //        $"Using default port: {DEFAULT_PORT}.\n");
-            //}
-            //else if (int.TryParse(args[0], out port))
-            //{
-            //    port = DEFAULT_PORT;
-            //    Console.WriteLine(
-            //        $"Invalid command line argument: {args[0]}.\n" +
-            //        $"Using default port: {DEFAULT_PORT}.\n");
-            //}
-            //else
-            //{
-            //    Console.WriteLine(
-            //        $"Using port from command line arg: {port}.\n");
-            //}
-
             Console.WriteLine("Starting game server...\n");
-            var server = new ServerGameManager();
-            NetDebug.Logger = server;
-            int port = server.serverConfig.Port;
+
+            NetDebug.Logger = new SimpleNetLogger();
+            var server = new GameServer();
+            int port = server.Port;
+
             if (!server.StartServer())
             {
                 Console.WriteLine(
@@ -54,10 +30,12 @@ namespace Server
             Console.WriteLine(
                 $"Server successfully started on port: {port}.\n" +
                 $"Press any key to stop the server.\n\n");
+
+            //Network Loop
             try
             {
-                float tickInterval = server.serverConfig.TickInterval;
-                int tickIntervalMS = server.serverConfig.TickIntervalMS;
+                float tickInterval = server.TickInterval;
+                int tickIntervalMS = (int)(tickInterval * 1000);
 
                 Stopwatch tickStopwatch = new Stopwatch();
                 double tickMultiplierMS = 1000.0 / Stopwatch.Frequency;
@@ -87,8 +65,8 @@ namespace Server
                         networkStats = server.GetNetworkDiffStatistics().ToBandwidthString();
                         ticksSinceLastBandwidthUpdate = 0;
                     }
-
-                    Console.WriteLine($"Tick: {(tickStopwatch.ElapsedTicks * tickMultiplierMS):00.00}ms\n" +
+                    var tickTimeFormatted = SixCharacterFormat(tickStopwatch.ElapsedTicks * tickMultiplierMS);
+                    Console.WriteLine($"Tick: {tickTimeFormatted}ms\n" +
                         $"{networkStats}");
 
                     Console.SetCursorPosition(0, statsCursorPosition);
@@ -103,8 +81,7 @@ namespace Server
                     $"Exception encountered in network loop! {exception.GetType()}: {exception.Message}.\n" +
                     $"Stack Trace:\n" +
                     $"{exception.StackTrace}\n" +
-                    $"-----------------------------------\n\n");
-                Thread.Sleep(500);
+                    $"-----------------------------------\n");
             }
             finally
             {
@@ -117,6 +94,31 @@ namespace Server
 
             Console.WriteLine("Press any key to exit...");
             Console.ReadKey(true);
+        }
+
+        class SimpleNetLogger : INetLogger
+        {
+            void INetLogger.WriteNet(NetLogLevel level, string str, params object[] args)
+            {
+                Console.WriteLine(string.Format(str, args));
+            }
+        }
+
+        static string SixCharacterFormat(double number)
+        {
+            if(number < 10)
+                return $"  {number:0.00}";
+            if (number < 100)
+                return $" {number:00.00}";
+            if (number < 1000)
+                return $"{number:000.00}";
+            if (number < 10000)
+                return $"{number:0000.0}";
+            if (number < 100000)
+                return $" {number:00000}";
+            if (number < 1000000)
+                return $"{number:000000}";
+            return ">1.0e6";
         }
     }
 }

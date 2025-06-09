@@ -1,8 +1,7 @@
-namespace Shared.Configuration
+namespace Server.Configuration
 {
     public class ServerConfig
     {
-        //TODO(); should be in server proj and namespace
         private readonly ServerConfigData savedData;
 
         public ServerConfig(ServerConfigData savedData)
@@ -12,7 +11,6 @@ namespace Shared.Configuration
         public string NetworkKey => savedData.NetworkKey;
         public int Port => savedData.Port;
         public float TickInterval => savedData.ServerTickInterval;
-        public int TickIntervalMS => (int)(savedData.ServerTickInterval * 1000);
         public float RpcTimeout => savedData.RpcTimeout;
     }
     public class ServerConfigData

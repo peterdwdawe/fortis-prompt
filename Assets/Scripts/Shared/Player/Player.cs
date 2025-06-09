@@ -57,13 +57,11 @@ namespace Shared.Player
 
         protected abstract void ShootLocal();
 
-        public IProjectile Shoot(int projectileID, Vector3 position, Vector3 direction)
+        public void Shoot(int projectileID, Vector3 position, Vector3 direction)
         {
             var projectile = SpawnProjectile(projectileID, position, direction);
 
             ShotProjectile?.Invoke(this, projectile);
-            return projectile;
-            //OnShootRequested?.Invoke(ID, Position, _lastMovementDirection);
         }
 
         protected abstract IProjectile SpawnProjectile(int ID, Vector3 position, Vector3 direction);

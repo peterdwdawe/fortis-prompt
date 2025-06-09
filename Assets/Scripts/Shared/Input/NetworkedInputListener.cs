@@ -1,8 +1,5 @@
 using System;
 using System.Numerics;
-using LiteNetLib;
-using Shared.Networking.Messages;
-using Shared.Player;
 
 namespace Shared.Input
 {
@@ -19,10 +16,6 @@ namespace Shared.Input
         {
             Movement = input;
             OnTransformUpdated?.Invoke(position, rotation);
-        }
-
-        public NetworkedInputListener()
-        {
         }
     }
 }

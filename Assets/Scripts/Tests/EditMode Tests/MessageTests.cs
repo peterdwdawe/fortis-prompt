@@ -99,7 +99,9 @@ public class MessageTests
                 w.Put<T>(o));
     }
 
-    void TestSerialization<T>(NetDataWriter writer, NetDataReader reader, T testObject, Func<NetDataReader, T> Get, Action<NetDataWriter, T> Put)
+    void TestSerialization<T>(
+        NetDataWriter writer, NetDataReader reader, T testObject, 
+        Func<NetDataReader, T> Get, Action<NetDataWriter, T> Put)
         where T : struct
     {
         writer.Reset();

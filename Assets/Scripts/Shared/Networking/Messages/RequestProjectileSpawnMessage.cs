@@ -1,8 +1,4 @@
-﻿using LiteNetLib;
-using LiteNetLib.Utils;
-using System.Numerics;
-
-namespace Shared.Networking.Messages
+﻿namespace Shared.Networking.Messages
 {
     //public struct RequestProjectileSpawnMessage : IStandardNetworkMessage<RequestProjectileSpawnMessage>
     //{
