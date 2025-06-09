@@ -52,15 +52,10 @@ The server build targets .NET 8.0 and the client was built using Unity 2022.3.62
 - [System.Text.Json 9.0.5](https://learn.microsoft.com/en-ca/dotnet/api/system.text.json?view=net-8.0) for config file serialization.
 
 ### Issues and Limitations
-- Projectiles are not currently networked via RPC as requested in the prompt - I'm still looking for more guidance on what's expected.
-  - Current behaviour uses existing connection to send a projectile spawn request, and receive a response from the server.
 - I've only tested the server locally, using "localhost" as the network address. I don't see why there would be any problems when deployed to a server, but haven't tested it.
 - Code coverage is very low - currently only testing network message serialization/deserialization.
 - Player-player/player-world/projectile-world collision is not yet implemented.
 - Bots are not yet implemented.
-- Right now, there are two copies of each config file (NetworkConfig.json, PlayerConfig.json, ProjectileConfig.json) - one for the server and one for the client. Any changes must be done in both files or you'll get some weird errors.
-  - This is obviously awful - if there's time, I'd like to keep the config file on the server only, and send that data across whenever a client connects.
-  - If you do run into any issues with desynced config files, just delete them all - They'll regenerate on startup if not found.
 
 ## Roadmap
 
