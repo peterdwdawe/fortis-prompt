@@ -9,23 +9,35 @@ namespace Server
 {
     public class ServerNetworkManager : NetworkManager, INetworkServer
     {
-        public ServerNetworkManager(NetworkConfig networkConfig) : base(networkConfig)
+        private readonly byte _maxPlayers;
+
+        public ServerNetworkManager(float rpcTimeout, string networkKey, byte maxPlayers) : base(rpcTimeout, networkKey)
         {
+            _maxPlayers = maxPlayers;
+            _listener.ConnectionRequestEvent += OnConnectionRequest;
         }
-        public void SendToAll(IStandardNetworkMessage message)
-            => SendToAll(message, ChannelType.Standard);
+        private void OnConnectionRequest(ConnectionRequest request)
+        {
+            if (_netManager.ConnectedPeersCount < _maxPlayers)
+                request.AcceptIfKey(_networkKey);
+            else
+                request.Reject();
+        }
 
-        public void SendToAllExcept(int playerID, IStandardNetworkMessage message)
-            => SendToAllExcept(playerID, message, ChannelType.Standard);
+        public void SendToAll(IStandardNetworkMessage message, DeliveryMethod deliveryMethod)
+            => SendToAll(message, ChannelType.Standard, deliveryMethod);
 
-        public void SendToAllExcept(NetPeer peer, IStandardNetworkMessage message)
-            => SendToAllExcept(peer, message, ChannelType.Standard);
+        public void SendToAllExcept(int playerID, IStandardNetworkMessage message, DeliveryMethod deliveryMethod)
+            => SendToAllExcept(playerID, message, ChannelType.Standard, deliveryMethod);
 
-        public void SendTo(int playerID, IStandardNetworkMessage message)
-            => SendTo(playerID, message, ChannelType.Standard);
+        public void SendToAllExcept(NetPeer peer, IStandardNetworkMessage message, DeliveryMethod deliveryMethod)
+            => SendToAllExcept(peer, message, ChannelType.Standard, deliveryMethod);
 
-        public void SendTo(NetPeer peer, IStandardNetworkMessage message)
-            => SendTo(peer, message, ChannelType.Standard);
+        public void SendTo(int playerID, IStandardNetworkMessage message, DeliveryMethod deliveryMethod)
+            => SendTo(playerID, message, ChannelType.Standard, deliveryMethod);
+
+        public void SendTo(NetPeer peer, IStandardNetworkMessage message, DeliveryMethod deliveryMethod)
+            => SendTo(peer, message, ChannelType.Standard, deliveryMethod);
 
         public TResponse SendRpcRequestTo<TResponse>(int playerID, IRpcRequestMessage<TResponse> message)
             where TResponse : IRpcResponseMessage

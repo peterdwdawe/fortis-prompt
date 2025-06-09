@@ -1,0 +1,6 @@
+{
+  "ServerTickInterval": 0.015,
+  "Port": 5000,
+  "NetworkKey": "fortis_connect_test",
+  "RpcTimeout": 1
+}

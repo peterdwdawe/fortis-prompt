@@ -2,6 +2,7 @@ using Shared.Networking;
 using System;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace Client.Adapters.UI
 {
@@ -94,6 +95,7 @@ namespace Client.Adapters.UI
             inGameGroup.alpha = 0f;
             inGameGroup.interactable = false;
             inGameGroup.blocksRaycasts = false;
+            EventSystem.current.SetSelectedGameObject(null);
         }
 
         public void ShowInGameMenu()
@@ -105,6 +107,7 @@ namespace Client.Adapters.UI
             mainMenuGroup.alpha = 0f;
             mainMenuGroup.interactable = false;
             mainMenuGroup.blocksRaycasts = false;
+            EventSystem.current.SetSelectedGameObject(null);
         }
 
         public void StartClient()

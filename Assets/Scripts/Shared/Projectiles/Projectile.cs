@@ -15,10 +15,9 @@ namespace Shared.Projectiles
         public bool Expired { get; protected set; }
         public int ID { get; private set; }
         public int ownerID { get; private set; }
-        private readonly ProjectileConfig projectileConfig;
-        private readonly NetworkConfig networkConfig;
+        private readonly GameConfig gameConfig;
 
-        public Projectile(int Id, int ownerID, Vector3 initialPosition, Vector3 direction, ProjectileConfig projectileConfig, NetworkConfig networkConfig)
+        public Projectile(int Id, int ownerID, Vector3 initialPosition, Vector3 direction, GameConfig gameConfig)
         {
             this.ID = Id;
             this.ownerID = ownerID;
@@ -26,8 +25,7 @@ namespace Shared.Projectiles
             Position = initialPosition;
             _direction = Vector3.Normalize(direction);
 
-            this.projectileConfig = projectileConfig;
-            this.networkConfig = networkConfig;
+            this.gameConfig = gameConfig;
         }
 
         public virtual void Update(float deltaTime)
@@ -35,7 +33,7 @@ namespace Shared.Projectiles
             if(Expired) 
                 return;
 
-            Position += _direction * (projectileConfig.MovementSpeed * deltaTime);
+            Position += _direction * (gameConfig.ProjectileSpeed * deltaTime);
 
             Moved?.Invoke(this);
         }

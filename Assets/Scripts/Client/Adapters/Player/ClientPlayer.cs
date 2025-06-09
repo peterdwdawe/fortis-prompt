@@ -1,13 +1,7 @@
-﻿using Client.Adapters.Networking;
-using Shared.Configuration;
+﻿using Shared.Configuration;
 using Shared.Networking.RPC;
 using Shared.Networking.Messages;
 using Shared.Input;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using Shared.Networking;
 using Shared.Projectiles;
@@ -18,11 +12,39 @@ namespace Client.Adapters.Player
     public class ClientPlayer : Shared.Player.Player
     {
         private readonly INetworkClient netClient;
+        private readonly ClientConfig clientConfig;
 
-        public ClientPlayer(int id, IInputListener inputListener, bool localPlayer, PlayerConfig playerConfig, NetworkConfig networkConfig, ProjectileConfig projectileConfig, INetworkClient netClient) 
-            : base(id, inputListener, localPlayer, playerConfig, networkConfig, projectileConfig)
+        float timeSinceLastUpdate = 0f;
+
+        public ClientPlayer(int id, IInputListener inputListener, bool localPlayer, GameConfig gameConfig, ClientConfig clientConfig, INetworkClient netClient) 
+            : base(id, inputListener, localPlayer, gameConfig)
         {
             this.netClient = netClient;
+            this.clientConfig = clientConfig;
+        }
+
+        public override void Update(float deltaTime)
+        {
+            base.Update(deltaTime);
+
+            if (!LocalPlayer)
+            {
+                return;
+            }
+
+            if (Alive)
+            {
+                timeSinceLastUpdate += deltaTime;
+                if (timeSinceLastUpdate >= clientConfig.PlayerUpdateInterval)
+                {
+                    netClient.Send(new PlayerUpdateMessage(ID, LastInput, Position, Rotation), LiteNetLib.DeliveryMethod.Sequenced);
+                    timeSinceLastUpdate = 0;
+                }
+            }
+            else
+            {
+                timeSinceLastUpdate = 0;
+            }
         }
 
         protected override void ShootLocal() 
@@ -52,7 +74,7 @@ namespace Client.Adapters.Player
 
         protected override IProjectile SpawnProjectile(int ID, System.Numerics.Vector3 position, System.Numerics.Vector3 direction)
         {
-            var projectile = new Projectile(ID, this.ID, position, direction, projectileConfig, networkConfig);
+            var projectile = new Projectile(ID, this.ID, position, direction, gameConfig);
 
             ProjectileView projectileView = UnityEngine.Object.Instantiate(Resources.Load<ProjectileView>("Projectile"));
             projectileView.Setup(projectile);

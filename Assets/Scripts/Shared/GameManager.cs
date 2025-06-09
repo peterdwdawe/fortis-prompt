@@ -19,27 +19,28 @@ namespace Shared
             //networkConfig = LoadConfig<NetworkConfig>(networkConfigPath);
             //playerConfig = LoadConfig<PlayerConfig>(playerConfigPath);
             //projectileConfig = LoadConfig<ProjectileConfig>(projectileConfigPath);
-            networkConfig = new NetworkConfig(LoadConfig<NetworkConfigData>(networkConfigPath));
-            playerConfig = new PlayerConfig(LoadConfig<PlayerConfigData>(playerConfigPath));
-            projectileConfig = new ProjectileConfig(LoadConfig<ProjectileConfigData>(projectileConfigPath));
+            //networkConfig = new NetworkConfig(LoadConfig<NetworkConfigData>(networkConfigPath));
+            //playerConfig = new PlayerConfig(LoadConfig<PlayerConfigData>(playerConfigPath));
+            //projectileConfig = new ProjectileConfig(LoadConfig<ProjectileConfigData>(projectileConfigPath));
 
-            playerLookup = new Dictionary<int, IPlayer>(networkConfig.MaxPlayers);
-            projectileLookup = new Dictionary<int, IProjectile>(networkConfig.MaxPlayers * 16);
-            networkedInputListenerLookup = new Dictionary<int, NetworkedInputListener>(networkConfig.MaxPlayers);
+            GetConfigData();
+
+            playerLookup = new Dictionary<int, IPlayer>();
+            projectileLookup = new Dictionary<int, IProjectile>();
+            networkedInputListenerLookup = new Dictionary<int, NetworkedInputListener>();
 
             networkManager = GenerateNetworkManager();
             networkManager.MessageLogged += Log;
-            //messageHandler = GenerateMessageHandler();
         }
 
-        //protected readonly IMessageHandler messageHandler;
+        protected abstract void GetConfigData();
 
-        protected const string networkConfigPath = "NetworkConfig.json";
-        protected const string playerConfigPath = "PlayerConfig.json";
-        protected const string projectileConfigPath = "ProjectileConfig.json";
+
+        //protected const string networkConfigPath = "NetworkConfig.json";
+        //protected const string playerConfigPath = "PlayerConfig.json";
+        //protected const string projectileConfigPath = "ProjectileConfig.json";
 
         protected abstract TNetworkManager GenerateNetworkManager();
-        //protected abstract IMessageHandler GenerateMessageHandler();
         protected readonly TNetworkManager networkManager;
 
         protected abstract void Log(string message);
@@ -86,9 +87,6 @@ namespace Shared
 
             networkManager.Update(deltaTime);
 
-            //if (networkManager == null) //networkManager.Tick() can make us close connection - we need to check here again to make sure we're still in-game.
-            //    return;
-
             var connectionState = networkManager.CheckConnectionState(out bool stateChanged);
             if (stateChanged)
                 StateChanged?.Invoke(connectionState);
@@ -114,14 +112,13 @@ namespace Shared
         protected IEnumerable<IPlayer> AllPlayers => playerLookup.Values;
         protected IEnumerable<IProjectile> AllProjectiles => projectileLookup.Values;
 
-
         Dictionary<int, IPlayer> playerLookup;
         Dictionary<int, IProjectile> projectileLookup;
         Dictionary<int, NetworkedInputListener> networkedInputListenerLookup;
 
-        public readonly NetworkConfig networkConfig;
-        protected readonly PlayerConfig playerConfig;
-        protected readonly ProjectileConfig projectileConfig;
+        //public readonly NetworkConfig networkConfig;
+        //protected readonly PlayerConfig playerConfig;
+        //protected readonly ProjectileConfig projectileConfig;
 
         protected bool TryGetPlayer(int ID, out IPlayer player)
             => playerLookup.TryGetValue(ID, out player) && player != null;
@@ -149,14 +146,14 @@ namespace Shared
             }
 
             networkedInputListenerLookup[ID] = listener;
-            var player = InstantiatePlayerInternal(ID,listener, false);
+            var player = InstantiatePlayer(ID,listener, false);
         }
 
-        protected abstract Player.Player CreateNewPlayer(int ID, IInputListener inputListener, bool local);
+        protected abstract Player.Player InstantiatePlayerInternal(int ID, IInputListener inputListener, bool local);
 
-        protected Player.Player InstantiatePlayerInternal(int ID, IInputListener inputListener, bool local)
+        protected Player.Player InstantiatePlayer(int ID, IInputListener inputListener, bool local)
         {
-            var player = CreateNewPlayer(ID, inputListener, local);
+            var player = InstantiatePlayerInternal(ID, inputListener, local);
 
             if (playerLookup.ContainsKey(ID))
             {
@@ -184,8 +181,6 @@ namespace Shared
             playerLookup.Remove(player.ID);
         }
 
-        //protected abstract IProjectile InstantiateProjectileInternal(int ID, int ownerID, Vector3 position, Vector3 direction);
-
         protected virtual void OnPlayerShot(IPlayer player, IProjectile projectile)
         {
             if (ProjectileExists(projectile.ID))
@@ -198,22 +193,6 @@ namespace Shared
 
             projectileLookup[projectile.ID] = projectile;
         }
-
-        //protected void InstantiateProjectile(int ID, int ownerID, Vector3 position, Vector3 direction)
-        //{
-        //    TODO();// delete
-
-        //    IProjectile projectile = InstantiateProjectileInternal(ID, ownerID, position, direction);
-
-        //    //if (projectileLookup.ContainsKey(ID))
-        //    //{
-        //    //    Log($"InstantiateProjectile Error: projectile ID {ID} already exists! overwriting...");
-        //    //    //TODO();//cleanup previous? this shouldn't be happening anyway
-        //    //}
-        //    //projectile.Destroyed += OnProjectileDestroyed;
-
-        //    //projectileLookup[ID] = projectile;
-        //}
 
         protected virtual void OnProjectileSpawnReceived(ProjectileSpawnMessage message)
         {
@@ -236,10 +215,8 @@ namespace Shared
             }
         }
 
-        protected virtual void OnPlayerUpdateReceived(PlayerUpdateMessage message)
-        {
-            ApplyNetworkedMovement(message.playerID, message.input, message.position, message.rotation);
-        }
+        protected virtual void OnPlayerUpdateReceived(PlayerUpdateMessage message) 
+            => ApplyNetworkedMovement(message.playerID, message.input, message.position, message.rotation);
 
         static List<IProjectile> projectileCleanupList = new List<IProjectile>();
         static List<IPlayer> playerCleanupList = new List<IPlayer>();
@@ -253,13 +230,10 @@ namespace Shared
             playerCleanupList.AddRange(AllPlayers);
 
             foreach (var projectile in projectileCleanupList)
-            {
                 projectile.Destroy();
-            }
+
             foreach (var player in playerCleanupList)
-            {
                 player.Destroy();
-            }
         }
 
         protected void OnPlayerDisconnected(int playerID)
@@ -269,22 +243,18 @@ namespace Shared
                 player.Destroy();
 
                 projectileCleanupList.Clear();
+
                 foreach (var projectile in AllProjectiles)
                 {
                     if(projectile.ownerID == playerID)
-                    {
                         projectileCleanupList.Add(projectile);
-                    }
                 }
+
                 foreach (var projectile in projectileCleanupList)
-                {
                     projectile.Destroy();
-                }
             }
             else
-            {
                 Log($"DestroyPlayer Error: player ID {playerID} does not exist in lookup! ignoring...");
-            }
         }
 
         protected T LoadConfig<T>(string path) where T : class, new()
@@ -308,7 +278,6 @@ namespace Shared
 
             return config;
         }
-
 
         protected T Deserialize<T>(string jsonString) where T : class
         {

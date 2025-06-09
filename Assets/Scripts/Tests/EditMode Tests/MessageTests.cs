@@ -1,5 +1,6 @@
 using LiteNetLib.Utils;
 using NUnit.Framework;
+using Shared.Configuration;
 using Shared.Networking;
 using Shared.Networking.Messages;
 using System;
@@ -10,6 +11,8 @@ public class MessageTests
     [Test]
     public void MessageSerialization()
     {
+        //TODO(); // write more tests: test rpc messages serialization, send/receive, player/projectile simulation etc
+
         var writer = new NetDataWriter();
 
         var reader = new NetDataReader(writer);
@@ -57,11 +60,8 @@ public class MessageTests
             9,
             new System.Numerics.Vector3(2f, 7.3f, -8.1f),
             new System.Numerics.Vector3(1.2f, -6.1f, 5.8f));
-
-        //var projRequest = new RequestProjectileSpawnMessage
-        //    (10,
-        //    new System.Numerics.Vector3(9.4f, 8.5f, -1.6f),
-        //    new System.Numerics.Vector3(9.4f, 5.6f, -7f));
+        var gameConfig = new GameConfigurationMessage
+            (new GameConfigData());
 
         TestSerialization(writer, reader, v2, NetworkingExtensions.GetVector2, NetworkingExtensions.Put);
         TestSerialization(writer, reader, v3, NetworkingExtensions.GetVector3, NetworkingExtensions.Put);
@@ -80,7 +80,7 @@ public class MessageTests
 
         TestSerialization(writer, reader, projDespawn);
         TestSerialization(writer, reader, projSpawn);
-        //TestSerialization(writer, reader, projRequest);
+        TestSerialization(writer, reader, gameConfig);
     }
 
     void TestSerialization<T>(NetDataWriter writer, NetDataReader reader, T testObject)

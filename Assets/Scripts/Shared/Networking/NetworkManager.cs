@@ -14,10 +14,8 @@ namespace Shared.Networking
 {
     public class NetworkManager : INetworkManager
     {
-        //TODO();// use this instead of networkmanager
-        //TODO();// move over all server/client functionality
-
-        protected readonly NetworkConfig _networkConfig;
+        protected readonly float _rpcTimeout;
+        protected readonly string _networkKey;
 
         protected readonly NetManager _netManager;
 
@@ -27,13 +25,14 @@ namespace Shared.Networking
 
         public bool started { get; private set; } = false;
 
-        protected readonly float tickInterval;
+        //protected readonly float tickInterval;
         float CurrentTime = 0f;
 
-        public NetworkManager(NetworkConfig networkConfig)
+        public NetworkManager(float rpcTimeout, string networkKey)
         {
-            _networkConfig = networkConfig;
-            tickInterval = networkConfig.TickInterval;
+            _rpcTimeout = rpcTimeout;
+            _networkKey = networkKey;
+            //tickInterval = networkConfig.TickInterval;
 
             _dataWriter = new NetDataWriter();
 
@@ -42,10 +41,9 @@ namespace Shared.Networking
             _listener.PeerDisconnectedEvent += OnPeerDisconnected;
             _listener.NetworkReceiveEvent += OnNetworkReceive;
             _listener.NetworkErrorEvent += OnNetworkError;
-            _listener.ConnectionRequestEvent += OnConnectionRequest;
 
             _netManager = new NetManager(_listener);
-            _netManager.UpdateTime = _networkConfig.TickIntervalMS();
+            //_netManager.UpdateTime = _networkConfig.TickIntervalMS();
             _netManager.EnableStatistics = true;
             _netManager.ChannelsCount = 3;
         }
@@ -53,13 +51,6 @@ namespace Shared.Networking
         protected bool awaitingRpc = false;
         protected Queue<(NetPeer, IStandardNetworkMessage)> queuedMessageReceives = new Queue<(NetPeer, IStandardNetworkMessage)>();
 
-        private void OnConnectionRequest(ConnectionRequest request)
-        {
-            if (_netManager.ConnectedPeersCount < _networkConfig.MaxPlayers)
-                request.AcceptIfKey(_networkConfig.TestNetworkKey);
-            else
-                request.Reject();
-        }
 
         public bool IsConnected()
             => started && _netManager.ConnectedPeersCount > 0;
@@ -255,7 +246,7 @@ namespace Shared.Networking
 
         #region Send Functions
 
-        protected void SendToAll(INetSerializable message, ChannelType channelType)
+        protected void SendToAll(INetSerializable message, ChannelType channelType, DeliveryMethod deliveryMethod)
         {
             if (!IsConnected())
             {
@@ -265,10 +256,10 @@ namespace Shared.Networking
 
             _dataWriter.Reset();
             _dataWriter.Put(message);
-            _netManager.SendToAll(_dataWriter, (byte)channelType, DeliveryMethod.ReliableOrdered);
+            _netManager.SendToAll(_dataWriter, (byte)channelType, deliveryMethod);
         }
 
-        protected void SendToAllExcept(int playerID, INetSerializable message, ChannelType channelType)
+        protected void SendToAllExcept(int playerID, INetSerializable message, ChannelType channelType, DeliveryMethod deliveryMethod)
         {
             if (!IsConnected())
             {
@@ -281,14 +272,14 @@ namespace Shared.Networking
             foreach (var _peer in _netManager.ConnectedPeerList)
             {
                 if (_peer.Id == playerID) continue;
-                _peer.Send(_dataWriter, (byte) channelType, DeliveryMethod.ReliableOrdered);
+                _peer.Send(_dataWriter, (byte) channelType, deliveryMethod);
             }
         }
 
-        protected void SendToAllExcept(NetPeer peer, INetSerializable message, ChannelType channelType)
-            => SendToAllExcept(peer.Id, message, channelType);
+        protected void SendToAllExcept(NetPeer peer, INetSerializable message, ChannelType channelType, DeliveryMethod deliveryMethod)
+            => SendToAllExcept(peer.Id, message, channelType, deliveryMethod);
 
-        protected void SendTo(int playerID, INetSerializable message, ChannelType channelType)
+        protected void SendTo(int playerID, INetSerializable message, ChannelType channelType, DeliveryMethod deliveryMethod)
         {
             if (!IsConnected())
             {
@@ -303,10 +294,10 @@ namespace Shared.Networking
                 Log($"{message.GetType()} SendTo {playerID} failed: can't find peer!");
                 return;
             }
-            SendTo(peer, message, channelType);
+            SendTo(peer, message, channelType, deliveryMethod);
         }
 
-        protected void SendTo(NetPeer peer, INetSerializable message, ChannelType channelType)
+        protected void SendTo(NetPeer peer, INetSerializable message, ChannelType channelType, DeliveryMethod deliveryMethod)
         {
             if (!IsConnected())
             {
@@ -316,14 +307,14 @@ namespace Shared.Networking
 
             _dataWriter.Reset();
             _dataWriter.Put(message);
-            peer.Send(_dataWriter, (byte)channelType, DeliveryMethod.ReliableOrdered);
+            peer.Send(_dataWriter, (byte)channelType, deliveryMethod);
         }
-        protected void Send(INetSerializable message, ChannelType channelType)
-            => SendTo(_netManager.FirstPeer, message, channelType);
-
+        
+        protected void SendToFirstPeer(INetSerializable message, ChannelType channelType, DeliveryMethod deliveryMethod)
+            => SendTo(_netManager.FirstPeer, message, channelType, deliveryMethod);
 
         public void SendRpcResponseTo(NetPeer peer, IRpcResponseMessage message)
-            => SendTo(peer, message, ChannelType.RpcResponse);
+            => SendTo(peer, message, ChannelType.RpcResponse, DeliveryMethod.ReliableUnordered);
         #endregion
 
         #region Receive functions
@@ -335,6 +326,9 @@ namespace Shared.Networking
             {
                 case StandardMessageType.CustomMessage:
                     CustomMessageReceived?.Invoke((CustomMessage)msg);
+                    break;
+                case StandardMessageType.GameConfiguration:
+                    GameConfigReceived?.Invoke((GameConfigurationMessage)msg);
                     break;
                 case StandardMessageType.PlayerRegistration:
                     PlayerRegistered?.Invoke((PlayerRegistrationMessage)msg);
@@ -408,26 +402,21 @@ namespace Shared.Networking
             }
         }
 
-        void OnReceiveRpcResponse(NetPeer peer, NetPacketReader reader, DeliveryMethod deliveryMethod)
-        {
-        }
-
-
         protected TResponse SendRpcRequest<TResponse>(int playerID, IRpcRequestMessage<TResponse> message)
             where TResponse : IRpcResponseMessage
         {
-            SendTo(playerID, message, ChannelType.RpcRequest);
+            SendTo(playerID, message, ChannelType.RpcRequest, DeliveryMethod.ReliableUnordered);
             return WaitForRpcResponse<TResponse>();
         }
 
         protected TResponse SendRpcRequest<TResponse>(NetPeer peer, IRpcRequestMessage<TResponse> message)
             where TResponse : IRpcResponseMessage
         {
-            SendTo(peer, message, ChannelType.RpcRequest);
+            SendTo(peer, message, ChannelType.RpcRequest, DeliveryMethod.ReliableUnordered);
             return WaitForRpcResponse<TResponse>();
         }
 
-        int rpcTimeoutMS => (int)(_networkConfig.RpcTimeout * 1000);
+        int rpcTimeoutMS => (int)(_rpcTimeout * 1000);
 
         protected TResponse WaitForRpcResponse<TResponse>()
             where TResponse : IRpcResponseMessage
@@ -471,6 +460,7 @@ namespace Shared.Networking
         }
 
         public event Action<CustomMessage> CustomMessageReceived;
+        public event Action<GameConfigurationMessage> GameConfigReceived;
 
         public event Action<PlayerRegistrationMessage> PlayerRegistered;
         public event Action<PlayerHPUpdateMessage> PlayerHPUpdated;

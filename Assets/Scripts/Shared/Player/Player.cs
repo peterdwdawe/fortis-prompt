@@ -17,7 +17,6 @@ namespace Shared.Player
         public event Action<IPlayer> Spawned;
         public event Action<IPlayer> Died;
         public event Action<IPlayer> Destroyed;
-        public event Action<IPlayer> RespawnRequested;
 
         private readonly IInputListener _inputListener;
         protected Vector3 _lastMovementDirection { get; private set; } = Vector3.UnitZ;
@@ -27,19 +26,17 @@ namespace Shared.Player
         public Vector3 Position { get; private set; }
         public Quaternion Rotation { get; private set; }
 
-        float timeSinceLastUpdate = 0f;
-
         public int HP { get; private set; } = 0;
-        public int MaxHP => playerConfig.MaxHP;
+        public int MaxHP => gameConfig.PlayerMaxHP;
 
         public bool LocalPlayer { get; private set; }
 
-        protected readonly PlayerConfig playerConfig;
-        protected readonly NetworkConfig networkConfig;
-        protected readonly ProjectileConfig projectileConfig;
+        public float Diameter => gameConfig.PlayerRadius * 2f;
+
+        protected readonly GameConfig gameConfig;
         protected readonly float rotationSpeedRad;
 
-        protected Player(int id, IInputListener inputListener, bool localPlayer, PlayerConfig playerConfig, NetworkConfig networkConfig, ProjectileConfig projectileConfig)
+        protected Player(int id, IInputListener inputListener, bool localPlayer, GameConfig gameConfig)
         {
             ID = id;
             LocalPlayer = localPlayer;
@@ -48,13 +45,11 @@ namespace Shared.Player
             _inputListener.OnShootRequested += ShootLocal;
             _inputListener.OnTransformUpdated += UpdateTransform;
 
-            this.playerConfig = playerConfig;
-            this.networkConfig = networkConfig;
-            this.projectileConfig = projectileConfig;
-            this.rotationSpeedRad = MathF.Abs(playerConfig.RotationSpeed * MathF.PI * 2f);
+            this.gameConfig = gameConfig;
+            rotationSpeedRad = MathF.Abs(gameConfig.PlayerRotateSpeed * MathF.PI * 2f);
         }
 
-        private void UpdateTransform(Vector3 position, Quaternion rotation)
+        protected void UpdateTransform(Vector3 position, Quaternion rotation)
         {
             Position = position;
             Rotation = rotation;
@@ -73,15 +68,11 @@ namespace Shared.Player
 
         protected abstract IProjectile SpawnProjectile(int ID, Vector3 position, Vector3 direction);
 
-        public void Update(float deltaTime)
+        public virtual void Update(float deltaTime)
         {
-            if(Alive)
+            if (Alive)
             {
-                UpdateAlive(deltaTime);
-            }
-            else
-            {
-                UpdateDead(deltaTime);
+                UpdateTransform(deltaTime);
             }
         }
 
@@ -98,7 +89,7 @@ namespace Shared.Player
 
             LastInput = Vector2.Normalize(LastInput);
 
-            Vector3 movement = new Vector3(LastInput.X, 0, LastInput.Y) * (playerConfig.MovementSpeed * networkConfig.TickInterval);
+            Vector3 movement = new Vector3(LastInput.X, 0, LastInput.Y) * (gameConfig.PlayerMoveSpeed * deltaTime);
 
             if (movement == Vector3.Zero)
             {
@@ -115,29 +106,13 @@ namespace Shared.Player
 
             float maxAngle = rotationSpeedRad * deltaTime;
             var angle = CalculateAngleMagnitudeRadians(Rotation, target);
-            var t = MathF.Min(1f, angle / maxAngle);
+            var t = MathF.Min(1f, maxAngle / angle);
 
             Rotation = Quaternion.Slerp(
                 Rotation,
                 Quaternion.CreateFromAxisAngle(Vector3.UnitY, yaw),
                 t
             );
-        }
-
-        protected virtual void UpdateAlive(float deltaTime)
-        {
-            UpdateTransform(deltaTime);
-            timeSinceLastUpdate += deltaTime;
-            if (LocalPlayer && timeSinceLastUpdate >= networkConfig.PlayerUpdateInterval)
-            {
-                UpdateRequested?.Invoke(this);
-                timeSinceLastUpdate = 0;
-            }
-        }
-
-        protected virtual void UpdateDead(float deltaTime)
-        {
-            timeSinceLastUpdate = 0;
         }
 
         public void Dispose()
@@ -165,7 +140,6 @@ namespace Shared.Player
 
         public void Kill()
         {
-            //TODO();
             Died?.Invoke(this);
         }
 
@@ -176,20 +150,16 @@ namespace Shared.Player
             Destroyed?.Invoke(this);
         }
 
-        protected void RequestRespawn()
-        {
-            //TODO();
-            ////Looking at this code, I think I went backwards...
-            ////stuff the player does really should exist inside that class. need to redo.
-            RespawnRequested?.Invoke(this);
-        }
         const float kEpsilon = 0.000001F;
+
         static float CalculateAngleMagnitudeRadians(Quaternion a, Quaternion b)
         {
             float dot = MathF.Min(MathF.Abs(Quaternion.Dot(a, b)), 1f);
+
             if (dot > 1.0f - kEpsilon)
-                return 0f;
-            return MathF.Acos(dot);
+                return 0;
+
+            return MathF.Acos(dot) * 2f;
         }
     }
 }

@@ -43,6 +43,10 @@ namespace Client.Adapters.Character
             player.Destroyed += Destroy;
             player.HPReduced += Hit;
 
+            transform.position = player.Position.ToUnityVector();
+            transform.rotation = player.Rotation.ToUnityQuaternion();
+            transform.localScale =  new Vector3(player.Diameter,1f, player.Diameter);
+
             mainCapsule.material = player.LocalPlayer ? localPlayerMaterial : networkedPlayerMaterial;
             allRenderers = GetComponentsInChildren<MeshRenderer>();
             foreach (MeshRenderer renderer in allRenderers)

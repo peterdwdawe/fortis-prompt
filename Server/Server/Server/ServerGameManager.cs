@@ -1,5 +1,6 @@
 ﻿using LiteNetLib;
 using Shared;
+using Shared.Configuration;
 using Shared.Input;
 using Shared.Networking;
 using Shared.Networking.Messages;
@@ -8,7 +9,6 @@ using Shared.Player;
 using Shared.Projectiles;
 using System;
 using System.Numerics;
-using System.Text.Json;
 
 namespace Server
 {
@@ -16,18 +16,31 @@ namespace Server
     {
         protected override INetworkServer GenerateNetworkManager()
         {
-            var manager = new ServerNetworkManager(networkConfig);
+
+            var manager = new ServerNetworkManager(serverConfig.RpcTimeout, serverConfig.NetworkKey, gameConfig.MaxPlayerCount);
             manager.PeerConnected += OnPeerConnected;
             manager.PeerDisconnected += OnPeerDisconnected;
 
             manager.CustomMessageReceived += OnCustomMessageReceived;
             manager.PlayerUpdateReceived += OnPlayerUpdateReceived;
             manager.ProjectileSpawned += OnProjectileSpawnReceived;
-            //manager.ProjectileSpawnRequested += OnProjectileSpawnRequested;
             manager.SpawnProjectileHandler = HandleSpawnProjectileRpcRequest;
 
             manager.NetworkStopped += Cleanup;
             return manager;
+        }
+
+
+        protected const string serverConfigPath = "ServerConfig.json";
+        protected const string gameConfigPath = "GameConfig.json";
+
+        public ServerConfig serverConfig { get; private set; }
+        public GameConfig gameConfig { get; private set; }
+
+        protected override void GetConfigData()
+        {
+            serverConfig = new ServerConfig(LoadConfig<ServerConfigData>(serverConfigPath));
+            gameConfig = new GameConfig(LoadConfig<GameConfigData>(gameConfigPath));
         }
 
         private SpawnProjectileRpcResponseMessage HandleSpawnProjectileRpcRequest(NetPeer peer, SpawnProjectileRpcRequestMessage requestMessage)
@@ -47,16 +60,15 @@ namespace Server
             Console.WriteLine(string.Format(str, args));
         }
 
-        protected override Player CreateNewPlayer(int ID, IInputListener inputListener, bool local)
+        protected override Player InstantiatePlayerInternal(int ID, IInputListener inputListener, bool local)
         {
             Log("Create New Player!");
 
-            var player = new ServerPlayer(ID, inputListener, local, playerConfig, networkConfig, projectileConfig);
+            var player = new ServerPlayer(ID, inputListener, local, gameConfig);
 
             player.Spawned += OnPlayerSpawn;
             player.Died += OnPlayerDied;
             player.HPSet += OnPlayerHPSet;
-            player.RespawnRequested += SpawnPlayerAtRandomLocation;
 
             networkManager.SendTo(ID, new PlayerRegistrationMessage(ID, true));
             foreach (var otherPlayer in AllPlayers)
@@ -77,19 +89,9 @@ namespace Server
 
             networkManager.SendToAllExcept(ID, new PlayerRegistrationMessage(ID, false));
 
+            player.SpawnAtRandomLocation();
+
             return player;
-        }
-
-        Random random = new Random();
-
-        private Vector3 GetRandomSpawnPosition(IPlayer player)
-        {
-            return new Vector3
-                (
-                (float)(random.NextDouble() * 8f) - 4f,
-                1f,
-                (float)(random.NextDouble() * 8f) - 4f
-                );
         }
 
         protected override void OnPlayerDestroyed(IPlayer player)
@@ -97,24 +99,8 @@ namespace Server
             player.Spawned -= OnPlayerSpawn;
             player.Died -= OnPlayerDied;
             player.HPSet -= OnPlayerHPSet;
-            player.RespawnRequested -= SpawnPlayerAtRandomLocation;
             base.OnPlayerDestroyed(player);
             networkManager.SendToAll(new PlayerDeregistrationMessage(player.ID));
-        }
-
-        private void SpawnPlayerAtRandomLocation(int playerID)
-        {
-            if (!TryGetPlayer(playerID, out var player))
-            {
-                Console.WriteLine("Failed to spawn player - not found in lookup!");
-                return;
-            }
-            SpawnPlayerAtRandomLocation(player);
-        }
-        private void SpawnPlayerAtRandomLocation(IPlayer player)
-        {
-            player.SetHP(playerConfig.MaxHP);
-            player.Spawn(GetRandomSpawnPosition(player), Quaternion.Identity);
         }
 
         private void OnPlayerSpawn(IPlayer player)
@@ -142,17 +128,6 @@ namespace Server
             projectile.Moved += OnProjectileMoved;
         }
 
-        //protected override IProjectile InstantiateProjectileInternal(int ID, int ownerID, System.Numerics.Vector3 position, System.Numerics.Vector3 direction)
-        //{
-        //    //var projectile = new ServerProjectile(ID, ownerID, position, direction, projectileConfig, networkConfig);
-
-        //    //projectile.Moved += OnProjectileMoved;
-
-        //    //networkManager.SendToAll(new ProjectileSpawnMessage(ID, ownerID, position, direction));
-
-        //    //return projectile;
-        //}
-
         protected override void OnProjectileDestroyed(IProjectile projectile)
         {
             projectile.Moved -= OnProjectileMoved;
@@ -167,7 +142,7 @@ namespace Server
             if (CollisionCheck(projectile, out var hitPlayer))
             {
                 projectile.Destroy();
-                hitPlayer.SetHP(hitPlayer.HP - projectileConfig.Damage);
+                hitPlayer.SetHP(hitPlayer.HP - gameConfig.ProjectileDamage);
             }
         }
 
@@ -175,7 +150,7 @@ namespace Server
         {
             hitPlayer = null;
             bool foundPlayer = false;
-            float targetSqrDist = playerConfig.Radius * playerConfig.Radius;
+            float targetSqrDist = gameConfig.PlayerRadius * gameConfig.PlayerRadius;
 
             foreach (var player in AllPlayers)
             {
@@ -226,45 +201,23 @@ namespace Server
             networkManager.SendToAllExcept(message.ownerID, message);
         }
 
-
-        //private void InstantiateProjectile(int playerID, Vector3 position, Vector3 direction)
-        //{
-        //    InstantiateProjectile(lastProjectileID, playerID, position, direction);
-        //}
-
         protected override void ApplyNetworkedMovement(int playerID, Vector2 input, Vector3 position, Quaternion rotation)
         {
             base.ApplyNetworkedMovement(playerID, input, position, rotation);
             networkManager.SendToAllExcept(playerID, new PlayerUpdateMessage(playerID, input, position, rotation));
         }
 
-        public bool StartServer(int port)
+        public bool StartServer()
         {
-            return TryStartNetworkingInternal(port);
+            return TryStartNetworkingInternal(serverConfig.Port);
         }
 
         #region Network Message Handling
 
-        //protected override IMessageHandler GenerateMessageHandler()
-        //{
-        //    var handler = new MessageEventHandler();
-
-        //    handler.PeerConnected += OnPeerConnected;
-        //    handler.PeerDisconnected += OnPeerDisconnected;
-
-        //    handler.CustomMessageReceived += OnCustomMessageReceived;
-        //    handler.PlayerUpdateReceived += OnPlayerUpdateReceived;
-        //    handler.ProjectileSpawnRequested += OnProjectileSpawnRequested;
-
-        //    handler.NetworkStopped += Cleanup;
-
-        //    return handler;
-        //}
-
         private void OnPeerConnected(int peerID)
         {
+            networkManager.SendTo(peerID, new GameConfigurationMessage(gameConfig.GetData()));
             InstantiateNetworkedPlayer(peerID);
-            SpawnPlayerAtRandomLocation(peerID);
         }
 
         private void OnPeerDisconnected(int peerID)
@@ -284,11 +237,6 @@ namespace Server
             networkManager.SendTo(message.playerID, message);
             Console.WriteLine($"Server Sent: {message.msg} to peer {message.playerID}");
         }
-
-        //private void OnProjectileSpawnRequested(RequestProjectileSpawnMessage message)
-        //{
-        //    InstantiateProjectile(message.ownerID, message.position, message.direction);
-        //}
 
         #endregion
     }

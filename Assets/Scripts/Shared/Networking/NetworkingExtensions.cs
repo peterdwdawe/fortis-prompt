@@ -13,6 +13,10 @@ namespace Shared.Networking
 
             switch (msgType)
             {
+                case StandardMessageType.GameConfiguration:
+                    msg = new GameConfigurationMessage(reader);
+                    return true;
+
                 case StandardMessageType.PlayerUpdate:
                     msg = new PlayerUpdateMessage(reader);
                     return true;

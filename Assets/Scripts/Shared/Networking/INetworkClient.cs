@@ -1,4 +1,5 @@
-﻿using Shared.Networking.Messages;
+﻿using LiteNetLib;
+using Shared.Networking.Messages;
 using Shared.Networking.RPC;
 
 namespace Shared.Networking
@@ -7,7 +8,7 @@ namespace Shared.Networking
     {
         void ConnectToServer(string serverAddress, int serverPort);
 
-        void Send(IStandardNetworkMessage message);
+        void Send(IStandardNetworkMessage message, DeliveryMethod deliveryMethod = DeliveryMethod.ReliableOrdered);
 
         TResponse SendRpcRequest<TResponse>(IRpcRequestMessage<TResponse> message) where TResponse : IRpcResponseMessage;
     }

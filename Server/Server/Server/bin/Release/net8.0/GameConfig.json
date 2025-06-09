@@ -1,0 +1,11 @@
+{
+  "MaxPlayerCount": 8,
+  "PlayerMoveSpeed": 4,
+  "PlayerRotateSpeed": 2,
+  "PlayerRadius": 0.5,
+  "PlayerMaxHP": 100,
+  "PlayerRespawnTime": 5,
+  "ProjectileDamage": 25,
+  "ProjectileSpeed": 8,
+  "ProjectileLifetime": 4
+}

@@ -11,7 +11,6 @@ namespace Shared.Player
         event Action<IPlayer> Spawned;
         event Action<IPlayer> Died;
         event Action<IPlayer> Destroyed;
-        event Action<IPlayer> RespawnRequested;
         event Action<IPlayer> UpdateRequested;
         event Action<IPlayer> HPReduced;
 
@@ -20,6 +19,7 @@ namespace Shared.Player
         int ID { get; }
         int HP { get; }
         int MaxHP { get; }
+        float Diameter { get; }
         bool Alive { get; }
         bool LocalPlayer { get; }
         Vector2 LastInput { get; }

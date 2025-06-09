@@ -7,6 +7,8 @@ namespace Shared.Networking.RPC
     {
         public RpcMessageType MsgType => RpcMessageType.SpawnProjectile;
 
+        bool IRpcResponseMessage.Approved => approved;
+
         public bool approved;
         public int projectileID;
         public int ownerID;
@@ -55,6 +57,7 @@ namespace Shared.Networking.RPC
 
         public bool Equals(SpawnProjectileRpcResponseMessage other)
             => MsgType == other.MsgType
+            && approved == other.approved
             && projectileID == other.projectileID
             && ownerID == other.ownerID
             && position == other.position

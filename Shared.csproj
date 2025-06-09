@@ -76,10 +76,16 @@
     <Compile Include="Assets\Scripts\Shared\Networking\RPC\SpawnProjectileRpcRequestMessage.cs" />
     <Compile Include="Assets\Scripts\Shared\Projectiles\IProjectile.cs" />
     <Compile Include="Assets\Scripts\Shared\Networking\NetworkingExtensions.cs" />
+    <Compile Include="Assets\Scripts\Shared\Configuration\ClientConfig.cs" />
+    <Compile Include="Assets\Scripts\Shared\Configuration\GameConfig.cs" />
+    <Compile Include="Assets\Scripts\Shared\Networking\RPC\IRpcRequestMessage.cs" />
     <Compile Include="Assets\Scripts\Shared\Networking\INetworkClient.cs" />
     <Compile Include="Assets\Scripts\Shared\Player\IPlayer.cs" />
     <Compile Include="Assets\Scripts\Shared\Configuration\PlayerConfig.cs" />
+    <Compile Include="Assets\Scripts\Shared\Networking\Messages\GameConfigurationMessage.cs" />
     <Compile Include="Assets\Scripts\Shared\Projectiles\Projectile.cs" />
+    <Compile Include="Assets\Scripts\Shared\Configuration\ServerConfig.cs" />
+    <Compile Include="Assets\Scripts\Shared\Networking\RPC\IRpcResponseMessage.cs" />
     <Compile Include="Assets\Scripts\Shared\Networking\Messages\PlayerRegistrationMessage.cs" />
     <Compile Include="Assets\Scripts\Shared\Input\NetworkedInputListener.cs" />
     <Compile Include="Assets\Scripts\Shared\Networking\INetworkServer.cs" />

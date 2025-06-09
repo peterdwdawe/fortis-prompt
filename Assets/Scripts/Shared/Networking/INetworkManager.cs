@@ -1,11 +1,9 @@
 ﻿using LiteNetLib;
-using Shared.Networking.Messages;
 using Shared.Networking.RPC;
 using System;
 
 namespace Shared.Networking
 {
-
     public interface INetworkManager
     {
         event Action NetworkStarted;

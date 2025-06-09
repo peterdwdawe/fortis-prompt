@@ -14,7 +14,6 @@ namespace Client.Adapters.Projectiles
             enabled = true;
             transform.position = _projectile.Position.ToUnityVector();
             transform.rotation = Quaternion.LookRotation(_projectile.Direction.ToUnityVector());
-
         }
 
         private void Update()

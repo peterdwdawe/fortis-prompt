@@ -6,6 +6,7 @@ namespace Shared.Networking.Messages
     public enum StandardMessageType : byte
     {
         CustomMessage = 0,
+        GameConfiguration,
         PlayerRegistration,
         PlayerDeregistration,
         PlayerUpdate,

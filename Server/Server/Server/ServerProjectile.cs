@@ -9,10 +9,10 @@ namespace Server
         private readonly float lifetime;
         float lifetimeTimer = 0f;
 
-        public ServerProjectile(int Id, int ownerID, Vector3 initialPosition, Vector3 direction, ProjectileConfig projectileConfig, NetworkConfig networkConfig)
-            : base(Id, ownerID, initialPosition, direction, projectileConfig, networkConfig)
+        public ServerProjectile(int Id, int ownerID, Vector3 initialPosition, Vector3 direction, GameConfig gameConfig)
+            : base(Id, ownerID, initialPosition, direction, gameConfig)
         {
-            lifetime = projectileConfig.Duration;
+            lifetime = gameConfig.ProjectileLifetime;
         }
 
         public override void Update(float deltaTime)

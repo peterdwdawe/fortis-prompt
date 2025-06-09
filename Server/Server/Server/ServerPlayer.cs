@@ -9,32 +9,48 @@ namespace Server
 {
     internal class ServerPlayer : Player
     {
-        private int deadTick = 0;
-        private readonly int respawnWaitTicks;
+        private float deadTimer = 0;
+        private readonly float respawnWaitTime;
 
-        public ServerPlayer(int id, IInputListener inputListener, bool localPlayer, PlayerConfig playerConfig, NetworkConfig networkConfig, ProjectileConfig projectileConfig)
-            : base(id, inputListener, localPlayer, playerConfig, networkConfig, projectileConfig)
+        public ServerPlayer(int id, IInputListener inputListener, bool localPlayer, GameConfig gameConfig)
+            : base(id, inputListener, localPlayer, gameConfig)
         {
-            respawnWaitTicks = (int)(playerConfig.RespawnTime / networkConfig.TickInterval);
+            respawnWaitTime = gameConfig.PlayerRespawnTime;
         }
 
-        protected override void UpdateAlive(float deltaTime)
+        public override void Update(float deltaTime)
         {
-            base.UpdateAlive(deltaTime);
-            deadTick = 0;
-        }
+            base.Update(deltaTime);
 
-        protected override void UpdateDead(float deltaTime)
-        {
-            base.UpdateDead(deltaTime);
-            deadTick++;
-
-            if (deadTick >= respawnWaitTicks)
+            if (Alive)
             {
-                RequestRespawn();
+                deadTimer = 0f;
             }
+            else
+            {
+                deadTimer += deltaTime;
 
-            //TODO();// just do this in gameManager?
+                if (deadTimer >= respawnWaitTime)
+                {
+                    SpawnAtRandomLocation();
+                }
+            }
+        }
+
+        public void SpawnAtRandomLocation()
+        {
+            SetHP(gameConfig.PlayerMaxHP);
+            Spawn(GetRandomSpawnPosition(), Quaternion.Identity);
+        }
+
+        Random random = new Random();
+
+        private Vector3 GetRandomSpawnPosition()
+        {
+            return new Vector3
+                ((float)(random.NextDouble() * 8f) - 4f,
+                1f,
+                 (float)(random.NextDouble() * 8f) - 4f);
         }
 
         protected override void ShootLocal()
@@ -42,16 +58,7 @@ namespace Server
             Console.WriteLine("Error: ShootLocal called on server!");
         }
 
-        protected override IProjectile SpawnProjectile(int ID, Vector3 position, Vector3 direction)
-        {
-            var projectile = new ServerProjectile(ID, this.ID, position, direction, projectileConfig, networkConfig);
-
-            //projectile.Moved += OnProjectileMoved;
-
-            //networkManager.SendToAll(new ProjectileSpawnMessage(ID, ownerID, position, direction));
-
-            return projectile;
-            //throw new NotImplementedException();
-        }
+        protected override IProjectile SpawnProjectile(int ID, Vector3 position, Vector3 direction) 
+            => new ServerProjectile(ID, this.ID, position, direction, gameConfig);
     }
 }

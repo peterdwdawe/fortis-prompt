@@ -16,33 +16,33 @@ namespace Server
         {
             Console.CursorVisible = false;
 
-            int port = DEFAULT_PORT;
+            //int port = DEFAULT_PORT;
 
-            //first arg can be optionally given to specify port
-            if (args == null || args.Length < 1)
-            {
-                Console.WriteLine(
-                    $"To run on a particular port, pass it in as a command-line argument.\n" +
-                    $"Using default port: {DEFAULT_PORT}.\n");
-            }
-            else if (int.TryParse(args[0], out port))
-            {
-                port = DEFAULT_PORT;
-                Console.WriteLine(
-                    $"Invalid command line argument: {args[0]}.\n" +
-                    $"Using default port: {DEFAULT_PORT}.\n");
-            }
-            else
-            {
-                Console.WriteLine(
-                    $"Using port from command line arg: {port}.\n");
-            }
+            ////first arg can be optionally given to specify port
+            //if (args == null || args.Length < 1)
+            //{
+            //    Console.WriteLine(
+            //        $"To run on a particular port, pass it in as a command-line argument.\n" +
+            //        $"Using default port: {DEFAULT_PORT}.\n");
+            //}
+            //else if (int.TryParse(args[0], out port))
+            //{
+            //    port = DEFAULT_PORT;
+            //    Console.WriteLine(
+            //        $"Invalid command line argument: {args[0]}.\n" +
+            //        $"Using default port: {DEFAULT_PORT}.\n");
+            //}
+            //else
+            //{
+            //    Console.WriteLine(
+            //        $"Using port from command line arg: {port}.\n");
+            //}
 
             Console.WriteLine("Starting game server...\n");
             var server = new ServerGameManager();
             NetDebug.Logger = server;
-
-            if (!server.StartServer(port))
+            int port = server.serverConfig.Port;
+            if (!server.StartServer())
             {
                 Console.WriteLine(
                     $"\nServer failed to start on port {port}.\n" +
@@ -56,8 +56,8 @@ namespace Server
                 $"Press any key to stop the server.\n\n");
             try
             {
-                float tickInterval = server.networkConfig.TickInterval;
-                int tickIntervalMS = server.networkConfig.TickIntervalMS();
+                float tickInterval = server.serverConfig.TickInterval;
+                int tickIntervalMS = server.serverConfig.TickIntervalMS;
 
                 Stopwatch tickStopwatch = new Stopwatch();
                 double tickMultiplierMS = 1000.0 / Stopwatch.Frequency;
