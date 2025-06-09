@@ -5,10 +5,9 @@ My submission for the given [Multiplayer Programming Prompt](docs/prompt.md).
 ## Get Started
 # TODO: add release links where needed
 To try out the project, download the latest client and server builds from "Releases", or clone the repo and build from there. 
-You can run the server (Server.exe) with a command line argument if you want to specify which port to use. Otherwise it will default to 5000.
 On the client build, just enter the server address and port you want to connect to, and hit connect. Your local character should be orange, and any networked player characters should be purple.
 ### Local Setup
-Running the server and multiple instances of the client all on one machine is the only way I've tested so far, and is straightforward. On the client side, the address defaults to localhost:5000, so it should work out of the box.
+Running the server and multiple instances of the client all on one machine is the only way I've tested so far, and is straightforward. On the client side, the address defaults to localhost:5000, and the default port in ServerConfig.json is also 5000, so it should work out of the box.
 ### Configuration
 Both the client and server builds use .json files to store configurations. Packaged with the server are ServerConfig.json and GameConfig.json. All the values in GameConfig are sent to clients as they connect and available during gameplay. ClientConfig.json holds any client-only configuration data. The settings are as follows:
 
@@ -41,17 +40,16 @@ Both the client and server builds use .json files to store configurations. Packa
 | ProjectileLifetime | float | Projectile lifetime in seconds | 4.0 |
 
 ## Info
+The server build targets .NET 8.0 and the client was built using Unity 2022.3.62f1.
 
-### Libraries Used
-**Server (Targets .NET 8.0):**
-  - [System.Text.Json 9.0.5](https://learn.microsoft.com/en-ca/dotnet/api/system.text.json?view=net-8.0) for config file serialization.
-   
-**Client (Unity 2022.3.62f1):**
- - [Unity Serialization 3.1.2](https://docs.unity3d.com/Packages/com.unity.serialization@3.1) (plus dependencies) for config file serialization, since Unity tends to complain with System.Text.Json.
+### Libraries Used   
+**Client Only:**
+ - [Unity Test Framework 1.4.3](https://docs.unity3d.com/Packages/com.unity.test-framework@1.4) (plus dependencies) for unit testing.
  - [Unity UI 1.0.0](https://docs.unity3d.com/Packages/com.unity.ugui@1.0) & [TextMeshPro 3.0.9](https://docs.unity3d.com/Packages/com.unity.textmeshpro@3.0) (plus dependencies) for GUI.
 
-**Both:**
+**Server & Client:**
 - [LiteNetLib 1.3.1](https://github.com/RevenantX/LiteNetLib/) for the networking transport layer.
+- [System.Text.Json 9.0.5](https://learn.microsoft.com/en-ca/dotnet/api/system.text.json?view=net-8.0) for config file serialization.
 
 ### Issues and Limitations
 - Projectiles are not currently networked via RPC as requested in the prompt - I'm still looking for more guidance on what's expected.
