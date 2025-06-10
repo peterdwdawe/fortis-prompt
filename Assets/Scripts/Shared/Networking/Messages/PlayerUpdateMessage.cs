@@ -3,7 +3,6 @@ using System.Numerics;
 
 namespace Shared.Networking.Messages
 {
-
     public struct PlayerUpdateMessage : IStandardNetworkMessage<PlayerUpdateMessage>
     {
         public PlayerUpdateMessage(NetDataReader reader) : this()

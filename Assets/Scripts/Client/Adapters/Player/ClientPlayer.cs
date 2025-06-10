@@ -1,12 +1,12 @@
 ﻿using Shared.Configuration;
-using Shared.Networking.RPC;
+using Shared.Networking.RpcMessages;
 using Shared.Networking.Messages;
 using Shared.Input;
 using UnityEngine;
-using Shared.Networking;
 using Shared.Projectiles;
 using Client.Adapters.Projectiles;
 using Client.Configuration;
+using Client.Adapters.Networking;
 
 namespace Client.Adapters.Player
 {

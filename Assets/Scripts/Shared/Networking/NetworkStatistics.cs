@@ -10,7 +10,7 @@ namespace Shared.Networking
         public readonly long BytesReceived;
         public readonly float TimeElapsed;
 
-        const float minReportedTimeElapsed = 0.001f;  //avoid divide by zero or huge numbers for first few frames
+        const float minReportedTimeElapsed = 0.0001f;  //avoid divide by zero or huge numbers for short time intervals
 
         public NetworkStatistics(long bytesSent, long bytesReceived, float timeElapsed)
         {

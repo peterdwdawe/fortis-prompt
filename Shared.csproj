@@ -62,35 +62,33 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\Shared\Networking\Messages\ProjectileDespawnMessage.cs" />
+    <Compile Include="Assets\Scripts\Shared\Networking\RpcMessages\IRpcMessage.cs" />
     <Compile Include="Assets\Scripts\Shared\Networking\Messages\PlayerDeathMessage.cs" />
     <Compile Include="Assets\Scripts\Shared\Networking\NetworkStatistics.cs" />
     <Compile Include="Assets\Scripts\Shared\Networking\Messages\PlayerUpdateMessage.cs" />
     <Compile Include="Assets\Scripts\Shared\Networking\NetworkManager.cs" />
     <Compile Include="Assets\Scripts\Shared\Networking\INetworkManager.cs" />
     <Compile Include="Assets\Scripts\Shared\Input\IInputListener.cs" />
-    <Compile Include="Assets\Scripts\Shared\Networking\Messages\RequestProjectileSpawnMessage.cs" />
     <Compile Include="Assets\Scripts\Shared\Networking\RPC\IRPCMessage.cs" />
     <Compile Include="Assets\Scripts\Shared\Networking\Messages\PlayerDeregistrationMessage.cs" />
+    <Compile Include="Assets\Scripts\Shared\Networking\RpcMessages\SpawnProjectileRpcRequestMessage.cs" />
     <Compile Include="Assets\Scripts\Shared\Networking\Messages\IStandardNetworkMessage.cs" />
-    <Compile Include="Assets\Scripts\Shared\Networking\RPC\SpawnProjectileRpcRequestMessage.cs" />
     <Compile Include="Assets\Scripts\Shared\Projectiles\IProjectile.cs" />
+    <Compile Include="Assets\Scripts\Shared\Networking\RpcMessages\IRpcResponseMessage.cs" />
     <Compile Include="Assets\Scripts\Shared\Networking\NetworkingExtensions.cs" />
     <Compile Include="Assets\Scripts\Shared\Configuration\GameConfig.cs" />
-    <Compile Include="Assets\Scripts\Shared\Networking\RPC\IRpcRequestMessage.cs" />
-    <Compile Include="Assets\Scripts\Shared\Networking\INetworkClient.cs" />
     <Compile Include="Assets\Scripts\Shared\Player\IPlayer.cs" />
     <Compile Include="Assets\Scripts\Shared\Networking\Messages\GameConfigurationMessage.cs" />
     <Compile Include="Assets\Scripts\Shared\Projectiles\Projectile.cs" />
-    <Compile Include="Assets\Scripts\Shared\Networking\RPC\IRpcResponseMessage.cs" />
     <Compile Include="Assets\Scripts\Shared\Networking\Messages\PlayerRegistrationMessage.cs" />
     <Compile Include="Assets\Scripts\Shared\Input\NetworkedInputListener.cs" />
-    <Compile Include="Assets\Scripts\Shared\Networking\INetworkServer.cs" />
+    <Compile Include="Assets\Scripts\Shared\Networking\RpcMessages\SpawnProjectileRpcResponseMessage.cs" />
     <Compile Include="Assets\Scripts\Shared\Networking\Messages\PlayerSpawnMessage.cs" />
     <Compile Include="Assets\Scripts\Shared\Networking\Messages\PlayerHPUpdateMessage.cs" />
     <Compile Include="Assets\Scripts\Shared\Player\Player.cs" />
     <Compile Include="Assets\Scripts\Shared\Networking\Messages\CustomMessage.cs" />
     <Compile Include="Assets\Scripts\Shared\Networking\Messages\ProjectileSpawnMessage.cs" />
-    <Compile Include="Assets\Scripts\Shared\Networking\RPC\SpawnProjectileRpcResponseMessage.cs" />
+    <Compile Include="Assets\Scripts\Shared\Networking\RpcMessages\IRpcRequestMessage.cs" />
     <Compile Include="Assets\Scripts\Shared\GameManager.cs" />
   </ItemGroup>
   <ItemGroup>

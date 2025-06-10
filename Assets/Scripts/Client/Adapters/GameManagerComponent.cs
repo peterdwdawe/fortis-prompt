@@ -3,7 +3,7 @@ using Shared.Networking;
 using System;
 using UnityEngine;
 
-namespace Client
+namespace Client.Adapters
 {
     public class GameManagerComponent : MonoBehaviour
     {

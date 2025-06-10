@@ -1,6 +1,6 @@
 ﻿using LiteNetLib.Utils;
 using Shared.Networking.Messages;
-using Shared.Networking.RPC;
+using Shared.Networking.RpcMessages;
 using System.Numerics;
 
 namespace Shared.Networking
@@ -53,10 +53,6 @@ namespace Shared.Networking
                     msg = new PlayerDeregistrationMessage(reader);
                     return true;
 
-                //case MessageType.RequestProjectileSpawn:
-                //    msg = new RequestProjectileSpawnMessage(reader);
-                //    return true;
-
                 default:
                     msg = default;
                     return false;
@@ -78,6 +74,7 @@ namespace Shared.Networking
                     return false;
             }
         }
+
         public static bool TryReadRpcResponseMessage(this NetDataReader reader, out IRpcResponseMessage msg)
         {
             RpcMessageType msgType = (RpcMessageType)reader.PeekByte();
@@ -93,8 +90,6 @@ namespace Shared.Networking
                     return false;
             }
         }
-
-        
 
         public static Vector2 GetVector2(this NetDataReader reader)
         {

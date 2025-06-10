@@ -1,7 +1,7 @@
 ﻿using LiteNetLib.Utils;
 using System.Numerics;
 
-namespace Shared.Networking.RPC
+namespace Shared.Networking.RpcMessages
 {
     public struct SpawnProjectileRpcResponseMessage : IRpcResponseMessage<SpawnProjectileRpcResponseMessage>
     {

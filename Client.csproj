@@ -65,13 +65,14 @@
     <Compile Include="Assets\Scripts\Client\Adapters\UI\PlayerUIView.cs" />
     <Compile Include="Assets\Scripts\Client\Adapters\Player\ClientPlayer.cs" />
     <Compile Include="Assets\Scripts\Client\GameClient.cs" />
-    <Compile Include="Assets\Scripts\Client\GameManagerComponent.cs" />
+    <Compile Include="Assets\Scripts\Client\Adapters\GameManagerComponent.cs" />
     <Compile Include="Assets\Scripts\Client\Adapters\UI\LogGroup.cs" />
     <Compile Include="Assets\Scripts\Client\Adapters\NumericsExtensions.cs" />
     <Compile Include="Assets\Scripts\Client\Adapters\Networking\NetworkClient.cs" />
     <Compile Include="Assets\Scripts\Client\Configuration\ClientConfig.cs" />
     <Compile Include="Assets\Scripts\Client\Input\LocalInputListener.cs" />
     <Compile Include="Assets\Scripts\Client\Adapters\Player\PlayerView.cs" />
+    <Compile Include="Assets\Scripts\Client\Adapters\Networking\INetworkClient.cs" />
     <Compile Include="Assets\Scripts\Client\Adapters\UI\NetworkCanvas.cs" />
     <Compile Include="Assets\Scripts\Client\Adapters\UI\GameCanvas.cs" />
   </ItemGroup>

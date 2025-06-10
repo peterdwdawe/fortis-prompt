@@ -1,7 +1,7 @@
 ﻿using LiteNetLib;
 using LiteNetLib.Utils;
 using Shared.Networking.Messages;
-using Shared.Networking.RPC;
+using Shared.Networking.RpcMessages;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -327,9 +327,6 @@ namespace Shared.Networking
                 case StandardMessageType.PlayerUpdate:
                     PlayerUpdateReceived?.Invoke((PlayerUpdateMessage)msg);
                     break;
-                //case MessageType.RequestProjectileSpawn:
-                //    ProjectileSpawnRequested?.Invoke((RequestProjectileSpawnMessage)msg);
-                //    break;
                 case StandardMessageType.ProjectileSpawn:
                     ProjectileSpawned?.Invoke((ProjectileSpawnMessage)msg);
                     break;

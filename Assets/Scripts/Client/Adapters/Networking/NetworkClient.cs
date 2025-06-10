@@ -1,7 +1,7 @@
 ﻿using LiteNetLib;
 using Shared.Networking;
 using Shared.Networking.Messages;
-using Shared.Networking.RPC;
+using Shared.Networking.RpcMessages;
 
 namespace Client.Adapters.Networking
 {

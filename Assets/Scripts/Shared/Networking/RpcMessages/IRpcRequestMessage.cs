@@ -1,4 +1,4 @@
-﻿namespace Shared.Networking.RPC
+﻿namespace Shared.Networking.RpcMessages
 {
     public interface IRpcRequestMessage : IRpcMessage { }
 

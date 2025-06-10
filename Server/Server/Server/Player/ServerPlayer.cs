@@ -1,13 +1,13 @@
-﻿using Shared.Configuration;
+﻿using Server.Projectiles;
+using Shared.Configuration;
 using Shared.Input;
-using Shared.Player;
 using Shared.Projectiles;
 using System;
 using System.Numerics;
 
-namespace Server
+namespace Server.Player
 {
-    internal class ServerPlayer : Player
+    internal class ServerPlayer : Shared.Player.Player
     {
         private float deadTimer = 0;
         private readonly float respawnWaitTime;

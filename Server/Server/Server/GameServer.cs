@@ -1,11 +1,13 @@
 ﻿using LiteNetLib;
 using Server.Configuration;
+using Server.Networking;
+using Server.Player;
 using Shared;
 using Shared.Configuration;
 using Shared.Input;
 using Shared.Networking;
 using Shared.Networking.Messages;
-using Shared.Networking.RPC;
+using Shared.Networking.RpcMessages;
 using Shared.Player;
 using Shared.Projectiles;
 using System;
@@ -15,7 +17,6 @@ namespace Server
 {
     public class GameServer : GameManager
     {
-
         private INetworkServer _server;
 
         protected override INetworkManager GenerateNetworkManager()
@@ -70,7 +71,7 @@ namespace Server
             _server.SendToAllExcept(playerID, new PlayerUpdateMessage(playerID, input, position, rotation));
         }
 
-        protected override Player InstantiatePlayerInternal(int ID, IInputListener inputListener, bool local)
+        protected override IPlayer InstantiatePlayerInternal(int ID, IInputListener inputListener, bool local)
         {
             Log("Create New Player!");
 

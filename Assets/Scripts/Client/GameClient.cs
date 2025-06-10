@@ -72,7 +72,7 @@ namespace Client
 
         #region Player Utils
 
-        protected override Player InstantiatePlayerInternal(int ID, IInputListener inputListener, bool local)
+        protected override IPlayer InstantiatePlayerInternal(int ID, IInputListener inputListener, bool local)
         {
             var player = new ClientPlayer(ID, inputListener, local,gameConfig, clientConfig, _client);
 

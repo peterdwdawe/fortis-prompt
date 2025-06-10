@@ -113,9 +113,9 @@ namespace Shared
 
         #region Player Utils
 
-        protected abstract Player.Player InstantiatePlayerInternal(int ID, IInputListener inputListener, bool local);
+        protected abstract IPlayer InstantiatePlayerInternal(int ID, IInputListener inputListener, bool local);
 
-        protected Player.Player InstantiatePlayer(int ID, IInputListener inputListener, bool local)
+        protected IPlayer InstantiatePlayer(int ID, IInputListener inputListener, bool local)
         {
             var player = InstantiatePlayerInternal(ID, inputListener, local);
 

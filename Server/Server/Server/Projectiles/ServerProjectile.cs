@@ -2,7 +2,7 @@
 using Shared.Projectiles;
 using System.Numerics;
 
-namespace Server
+namespace Server.Projectiles
 {
     internal class ServerProjectile : Projectile
     {

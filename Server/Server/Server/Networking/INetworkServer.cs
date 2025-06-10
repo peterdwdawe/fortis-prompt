@@ -1,8 +1,9 @@
 ﻿using LiteNetLib;
+using Shared.Networking;
 using Shared.Networking.Messages;
-using Shared.Networking.RPC;
+using Shared.Networking.RpcMessages;
 
-namespace Shared.Networking
+namespace Server.Networking
 {
     public interface INetworkServer : INetworkManager
     {

@@ -1,6 +1,6 @@
 ﻿using LiteNetLib.Utils;
 
-namespace Shared.Networking.RPC
+namespace Shared.Networking.RpcMessages
 {
     public enum RpcMessageType : byte
     {
