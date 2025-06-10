@@ -1,9 +1,8 @@
 # Fortis Multiplayer Prompt
-My submission for the given [**Multiplayer Programming Prompt**](docs/prompt.md).\
-The roadmap can be found [**here**](docs/roadmap.md).
+My submission for the given [**Multiplayer Programming Prompt**](docs/prompt.md). The roadmap can be found [**here**](docs/roadmap.md).
 
 ## Get Started
-To try out the project, download the latest builds of [Client.zip](https://github.com/peterdwdawe/fortis-prompt/releases/latest/download/Client.zip) and/or [Server.zip](https://github.com/peterdwdawe/fortis-prompt/releases/latest/download/Server.zip), or clone the repo and build from there. 
+To try out the project, download the latest [**Client**](https://github.com/peterdwdawe/fortis-prompt/releases/latest/download/Client) and [**Server**](https://github.com/peterdwdawe/fortis-prompt/releases/latest/download/Server.zip) builds, or clone the repo and build from there. 
 On the client build, just enter the server address and port you want to connect to, and hit connect. Your local character should be orange, and any networked player characters should be purple.
 ### Local Setup
 Running the server and multiple instances of the client all on one machine is the only way I've tested so far, and is straightforward. On the client side, the address defaults to localhost:5000, and the default port in ServerConfig.json is also 5000, so it should work out of the box.
