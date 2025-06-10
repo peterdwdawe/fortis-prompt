@@ -1,7 +1,3 @@
-# To-Do 
-**Before Submitting:**
-- Add/Improve Comments
-
 # Fortis Multiplayer Prompt
 My submission for the given [**Multiplayer Programming Prompt**](docs/prompt.md).\
 The roadmap can be found [**here**](docs/roadmap.md).
@@ -51,7 +47,7 @@ The server build targets .NET 8.0 and the client was built using Unity 2022.3.62
  - [Unity UI 1.0.0](https://docs.unity3d.com/Packages/com.unity.ugui@1.0) & [TextMeshPro 3.0.9](https://docs.unity3d.com/Packages/com.unity.textmeshpro@3.0) (plus dependencies) for main menu and health bar GUI.
 
 **Shared - Server & Client:**
-- [LiteNetLib 1.3.1](https://github.com/RevenantX/LiteNetLib/) for the networking transport layer.
+- [LiteNetLib 1.3.1](https://github.com/RevenantX/LiteNetLib/releases/tag/1.3.1) for the networking transport layer.
 - [System.Text.Json 9.0.5](https://learn.microsoft.com/en-ca/dotnet/api/system.text.json?view=net-8.0) for config file serialization.
 
 ### Issues and Limitations
