@@ -10,7 +10,6 @@ namespace Shared.Player
         event Action<IPlayer> Spawned;
         event Action<IPlayer> Died;
         event Action<IPlayer> Destroyed;
-        event Action<IPlayer> UpdateRequested;
         event Action<IPlayer> HPReduced;
 
         Vector3 Position { get; }

@@ -11,7 +11,6 @@ namespace Shared.Player
     public abstract class Player : IDisposable, IPlayer
     {
         public event OnShootHandler ShotProjectile;
-        public event Action<IPlayer> UpdateRequested;
         public event Action<IPlayer> HPSet;
         public event Action<IPlayer> HPReduced;
         public event Action<IPlayer> Spawned;
