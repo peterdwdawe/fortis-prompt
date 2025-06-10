@@ -9,7 +9,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <RootNamespace></RootNamespace>
+    <RootNamespace>
+    </RootNamespace>
     <ProjectGuid>{A975588F-D6A1-F07A-5B5F-722795E106CC}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
@@ -69,7 +70,6 @@
     <Compile Include="Assets\Scripts\Shared\Networking\NetworkManager.cs" />
     <Compile Include="Assets\Scripts\Shared\Networking\INetworkManager.cs" />
     <Compile Include="Assets\Scripts\Shared\Input\IInputListener.cs" />
-    <Compile Include="Assets\Scripts\Shared\Networking\RPC\IRPCMessage.cs" />
     <Compile Include="Assets\Scripts\Shared\Networking\Messages\PlayerDeregistrationMessage.cs" />
     <Compile Include="Assets\Scripts\Shared\Networking\RpcMessages\SpawnProjectileRpcRequestMessage.cs" />
     <Compile Include="Assets\Scripts\Shared\Networking\Messages\IStandardNetworkMessage.cs" />
@@ -622,6 +622,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Assets\Scripts\Shared\Networking\RPC\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="GenerateTargetFrameworkMonikerAttribute" />
